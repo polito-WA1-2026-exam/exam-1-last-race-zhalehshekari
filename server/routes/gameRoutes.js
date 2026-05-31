@@ -120,4 +120,31 @@ router.post('/game/submit', (req, res) => {
   res.json({ valid: true, score: Math.max(0, coins), events: eventLog });
 });
 
+// auth guard used by score and ranking routes
+const isLoggedIn = (req, res, next) => {
+  if (req.isAuthenticated()) return next();
+  res.status(401).json({ error: 'Not authenticated.' });
+};
+
+// POST /api/scores — save a score (auth required)
+router.post('/scores', isLoggedIn, (req, res) => {
+  const { score } = req.body;
+  if (score === undefined || typeof score !== 'number' || score < 0) {
+    return res.status(400).json({ error: 'Invalid score.' });
+  }
+  db.prepare('INSERT INTO scores (user_id, score) VALUES (?, ?)').run(req.user.id, score);
+  res.status(201).json({ message: 'Score saved.' });
+});
+
+// GET /api/ranking — all scores ordered by score desc (auth required)
+router.get('/ranking', isLoggedIn, (req, res) => {
+  const ranking = db.prepare(`
+    SELECT u.username, s.score, s.played_at
+    FROM scores s
+    JOIN users u ON s.user_id = u.id
+    ORDER BY s.score DESC, s.played_at ASC
+  `).all();
+  res.json(ranking);
+});
+
 export default router;
