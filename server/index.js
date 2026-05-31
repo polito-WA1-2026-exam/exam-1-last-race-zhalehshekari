@@ -3,6 +3,7 @@ import cors from 'cors';
 import morgan from 'morgan';
 import session from 'express-session';
 import passport from './auth.js';
+import authRoutes from './routes/authRoutes.js';
 
 const app = express();
 const port = 3001;
@@ -25,6 +26,9 @@ app.use(session({
 
 app.use(passport.initialize());
 app.use(passport.session());
+
+// routes
+app.use('/api/sessions', authRoutes);
 
 app.listen(port, () => {
   console.log(`Server listening at http://localhost:${port}`);
