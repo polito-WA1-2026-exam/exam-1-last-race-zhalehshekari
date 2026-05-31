@@ -4,6 +4,7 @@ import morgan from 'morgan';
 import session from 'express-session';
 import passport from './auth.js';
 import authRoutes from './routes/authRoutes.js';
+import gameRoutes from './routes/gameRoutes.js';
 
 const app = express();
 const port = 3001;
@@ -29,6 +30,7 @@ app.use(passport.session());
 
 // routes
 app.use('/api/sessions', authRoutes);
+app.use('/api', gameRoutes);
 
 app.listen(port, () => {
   console.log(`Server listening at http://localhost:${port}`);
