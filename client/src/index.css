@@ -94,3 +94,44 @@ body {
 .btn-accent:disabled {
   opacity: 0.6;
 }
+
+/* ── Home page ── */
+.home-page {
+  max-width: 760px;
+  margin: 2rem auto;
+  text-align: center;
+}
+
+.home-hero {
+  margin-bottom: 2.5rem;
+}
+
+.home-icon {
+  font-size: 3.5rem;
+  display: block;
+  margin-bottom: 0.5rem;
+}
+
+.steps-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 1rem;
+}
+
+.step-card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  padding: 1.25rem;
+  text-align: left;
+  transition: border-color 0.2s;
+}
+
+.step-card:hover {
+  border-color: var(--color-accent);
+}
+
+.step-icon {
+  font-size: 1.6rem;
+  margin-bottom: 0.5rem;
+}

@@ -1,24 +1,62 @@
-// Shown to anonymous users — just instructions
+import { Button } from 'react-bootstrap';
+import { useNavigate } from 'react-router-dom';
+
+const steps = [
+  {
+    icon: '🗺️',
+    title: 'Study the map',
+    desc: 'During the Setup phase, explore the full transit network — lines, stations, and interchanges.',
+  },
+  {
+    icon: '⏱️',
+    title: 'Plan your route',
+    desc: 'You have 90 seconds to select segments and build a path from your start to your destination.',
+  },
+  {
+    icon: '🎲',
+    title: 'Survive the journey',
+    desc: 'Each segment triggers a random event. You start with 20 coins — events add or subtract up to 4.',
+  },
+  {
+    icon: '🏆',
+    title: 'Claim your score',
+    desc: 'A valid route saves your final coin count. An invalid route scores 0. Logged-in scores hit the ranking.',
+  },
+];
+
 function HomePage() {
+  const navigate = useNavigate();
+
   return (
-    <div className="page-center">
-      <h1 className="display-5 fw-bold mb-3">Last Race</h1>
-      <p className="lead text-secondary mb-4">
-        A transit network strategy game. Plan your route, survive the journey.
-      </p>
-      <div className="instructions-card">
-        <h2 className="h5 mb-3">How to play</h2>
-        <ol className="text-start">
-          <li>Study the transit map during the <strong>Setup</strong> phase.</li>
-          <li>In the <strong>Planning</strong> phase (90 seconds), select segments to build a route from your start to your destination.</li>
-          <li>Each segment triggers a random <strong>event</strong> that adds or removes coins. You start with <strong>20 coins</strong>.</li>
-          <li>An invalid route costs you everything — score drops to <strong>0</strong>.</li>
-          <li>Your final score is saved to the <strong>global ranking</strong>.</li>
-        </ol>
-        <p className="mt-3 text-secondary small">
-          Log in to play and see the leaderboard.
+    <div className="home-page">
+      <div className="home-hero">
+        <span className="home-icon">🚇</span>
+        <h1 className="display-5 fw-bold mb-2">Last Race</h1>
+        <p className="lead text-secondary">
+          A transit network strategy game. Pick your route. Beat the odds.
         </p>
+        <Button
+          className="btn-accent mt-3 px-4 py-2"
+          onClick={() => navigate('/login')}
+        >
+          Log in to play →
+        </Button>
       </div>
+
+      <div className="steps-grid">
+        {steps.map((s) => (
+          <div key={s.title} className="step-card">
+            <div className="step-icon">{s.icon}</div>
+            <h2 className="h6 fw-semibold mb-1">{s.title}</h2>
+            <p className="text-secondary small mb-0">{s.desc}</p>
+          </div>
+        ))}
+      </div>
+
+      <p className="text-secondary small mt-4">
+        Line changes are only allowed at <strong>interchange stations</strong>.
+        Plan carefully — a broken route loses everything.
+      </p>
     </div>
   );
 }
