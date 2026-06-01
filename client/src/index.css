@@ -52,3 +52,45 @@ body {
   padding-left: 1.2rem;
   line-height: 2;
 }
+
+/* login card */
+.login-card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  padding: 2rem;
+  text-align: left;
+}
+
+/* dark form inputs */
+.dark-input {
+  background-color: #12151e !important;
+  border-color: var(--color-border) !important;
+  color: var(--color-text) !important;
+}
+
+.dark-input:focus {
+  box-shadow: 0 0 0 2px rgba(108, 99, 255, 0.4) !important;
+  border-color: var(--color-accent) !important;
+}
+
+.dark-input::placeholder {
+  color: var(--color-muted);
+}
+
+/* accent button */
+.btn-accent {
+  background-color: var(--color-accent) !important;
+  border-color: var(--color-accent) !important;
+  color: #fff !important;
+  font-weight: 600;
+  transition: opacity 0.15s;
+}
+
+.btn-accent:hover:not(:disabled) {
+  opacity: 0.85;
+}
+
+.btn-accent:disabled {
+  opacity: 0.6;
+}
