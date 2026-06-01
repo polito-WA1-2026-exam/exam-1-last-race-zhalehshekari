@@ -135,3 +135,66 @@ body {
   font-size: 1.6rem;
   margin-bottom: 0.5rem;
 }
+
+/* ── Ranking page ── */
+.ranking-page {
+  max-width: 680px;
+  margin: 0 auto;
+}
+
+.ranking-table-wrap {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.ranking-table {
+  margin-bottom: 0;
+  color: var(--color-text);
+}
+
+.ranking-table thead th {
+  background: #13151f;
+  border-color: var(--color-border);
+  color: var(--color-muted);
+  font-weight: 500;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 0.85rem 1rem;
+}
+
+.ranking-table tbody td {
+  border-color: var(--color-border);
+  padding: 0.75rem 1rem;
+  vertical-align: middle;
+}
+
+.ranking-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.ranking-me td {
+  background: rgba(108, 99, 255, 0.08);
+}
+
+.rank-pos {
+  font-size: 1.1rem;
+  width: 2.5rem;
+}
+
+.rank-score {
+  font-weight: 700;
+  color: var(--color-accent);
+}
+
+.badge-me {
+  background: var(--color-accent);
+  color: #fff;
+  font-size: 0.65rem;
+  padding: 0.15rem 0.45rem;
+  border-radius: 99px;
+  font-weight: 600;
+  vertical-align: middle;
+}
