@@ -241,3 +241,190 @@ body {
   background: transparent;
   border: 2px solid #c8d0df;
 }
+
+/* ── Game: Setup Phase ── */
+.game-setup {
+  max-width: 720px;
+  margin: 0 auto;
+}
+
+.setup-header {
+  margin-bottom: 1rem;
+}
+
+.setup-footer {
+  text-align: center;
+}
+
+/* ── Game: Planning Phase ── */
+.game-planning {
+  max-width: 720px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.planning-topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  padding: 0.9rem 1.25rem;
+  gap: 1rem;
+}
+
+.route-goal {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+}
+
+.goal-station {
+  font-weight: 700;
+  font-size: 1rem;
+  padding: 0.2rem 0.7rem;
+  border-radius: 8px;
+}
+
+.start-station {
+  background: rgba(34, 197, 94, 0.15);
+  color: #4ade80;
+}
+
+.dest-station {
+  background: rgba(239, 68, 68, 0.15);
+  color: #f87171;
+}
+
+.goal-arrow {
+  color: var(--color-muted);
+  font-size: 1.1rem;
+}
+
+.timer-block {
+  text-align: right;
+  min-width: 70px;
+}
+
+.timer-digits {
+  font-size: 1.4rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  transition: color 0.3s;
+}
+
+.timer-bar-track {
+  height: 4px;
+  background: var(--color-border);
+  border-radius: 2px;
+  margin-top: 4px;
+}
+
+.timer-bar-fill {
+  height: 100%;
+  border-radius: 2px;
+  transition: width 1s linear, background 0.3s;
+}
+
+/* segment selector + route */
+.planning-controls {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  padding: 1.1rem 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+.moves-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.move-btn {
+  background: #1e2130;
+  border: 1px solid var(--color-border);
+  color: var(--color-text);
+  padding: 0.4rem 1rem;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s;
+}
+
+.move-btn:hover {
+  border-color: var(--color-accent);
+  background: rgba(108, 99, 255, 0.1);
+}
+
+/* built route trail */
+.route-trail {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 0.85rem;
+  padding: 0.5rem 0.75rem;
+  background: #13151f;
+  border-radius: 8px;
+}
+
+.route-station {
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.route-arrow {
+  color: var(--color-muted);
+}
+
+.planning-actions {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+.undo-btn {
+  background: transparent;
+  border: 1px solid var(--color-border);
+  color: var(--color-muted);
+  padding: 0.4rem 0.9rem;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: color 0.15s, border-color 0.15s;
+}
+
+.undo-btn:hover {
+  color: var(--color-text);
+  border-color: var(--color-muted);
+}
+
+/* ── Result card ── */
+.result-card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 16px;
+  padding: 2.5rem 2rem;
+  text-align: center;
+}
+
+.result-icon {
+  font-size: 3rem;
+  margin-bottom: 0.75rem;
+}
+
+.result-score {
+  font-size: 4rem;
+  font-weight: 800;
+  color: var(--color-accent);
+  line-height: 1;
+  margin: 0.5rem 0 0.25rem;
+}
