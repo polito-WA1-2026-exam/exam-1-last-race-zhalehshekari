@@ -1,8 +1,8 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Button, Alert, Spinner } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
 import { getNetwork, getGameStart, submitRoute, saveScore } from '../api';
-import { useAuth } from '../contexts/AuthContext';
+import { useAuth } from '../contexts/useAuth';
 import NetworkMap from '../components/NetworkMap';
 
 function GamePage() {
@@ -10,24 +10,47 @@ function GamePage() {
   const navigate   = useNavigate();
 
   // ── State ──────────────────────────────────────────────────────────────────
-  const [phase,          setPhase]          = useState('loading');
-  const [network,        setNetwork]        = useState(null);
-  const [gameData,       setGameData]       = useState(null);    // { start, destination }
-  const [route,          setRoute]          = useState([]);       // [{ fromId, toId, lineId }]
-  const [currentId,      setCurrentId]      = useState(null);
-  const [timeLeft,       setTimeLeft]       = useState(90);
-  const [result,         setResult]         = useState(null);    // server response
-  const [eventIndex,     setEventIndex]     = useState(-1);      // which event is being shown
-  const [displayedCoins, setDisplayedCoins] = useState(20);
-  const [error,          setError]          = useState('');
+  const [phase,      setPhase]      = useState('loading');
+  const [network,    setNetwork]    = useState(null);
+  const [gameData,   setGameData]   = useState(null);   // { start, destination }
+  const [route,      setRoute]      = useState([]);      // [{ fromId, toId, lineId }]
+  const [currentId,  setCurrentId]  = useState(null);
+  const [timeLeft,   setTimeLeft]   = useState(90);
+  const [result,     setResult]     = useState(null);   // server response
+  const [eventIndex, setEventIndex] = useState(-1);
+  const [error,      setError]      = useState('');
 
-  // refs so timer/callback closures always read fresh values
+  // refs so timer/async closures always read fresh values
   const routeRef     = useRef([]);
   const gameDataRef  = useRef(null);
+  const userRef      = useRef(user);
   const hasSubmitted = useRef(false);
 
-  useEffect(() => { routeRef.current   = route;    }, [route]);
+  useEffect(() => { routeRef.current    = route;    }, [route]);
   useEffect(() => { gameDataRef.current = gameData; }, [gameData]);
+  useEffect(() => { userRef.current     = user;     }, [user]);
+
+  // ── Submit route (defined before effects that call it) ────────────────────
+  const handleSubmit = async () => {
+    if (hasSubmitted.current) return;
+    hasSubmitted.current = true;
+    setPhase('executing');
+    setEventIndex(-1);
+
+    const gd = gameDataRef.current;
+    const r  = routeRef.current;
+
+    try {
+      const res = await submitRoute(gd.start.id, gd.destination.id, r);
+      if (userRef.current && typeof res.score === 'number') {
+        await saveScore(res.score).catch(() => {}); // non-fatal
+      }
+      setResult(res);
+    } catch {
+      setError('Route submission failed.');
+      setPhase('setup');
+    }
+  };
 
   // ── Fetch network on mount ────────────────────────────────────────────────
   useEffect(() => {
@@ -35,22 +58,6 @@ function GamePage() {
       .then(data => { setNetwork(data); setPhase('setup'); })
       .catch(() => setError('Could not load the transit network.'));
   }, []);
-
-  // ── Start planning ────────────────────────────────────────────────────────
-  const startPlanning = async () => {
-    setError('');
-    try {
-      const data = await getGameStart();
-      setGameData(data);
-      setCurrentId(data.start.id);
-      setRoute([]);
-      setTimeLeft(90);
-      hasSubmitted.current = false;
-      setPhase('planning');
-    } catch {
-      setError('Could not start the game. Please try again.');
-    }
-  };
 
   // ── Planning timer ────────────────────────────────────────────────────────
   useEffect(() => {
@@ -62,59 +69,27 @@ function GamePage() {
   // auto-submit when timer expires
   useEffect(() => {
     if (phase === 'planning' && timeLeft === 0) handleSubmit();
-  }, [timeLeft]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [phase, timeLeft]);
 
-  // ── Submit route ──────────────────────────────────────────────────────────
-  const handleSubmit = useCallback(async () => {
-    if (hasSubmitted.current) return;
-    hasSubmitted.current = true;
-    setPhase('executing');
-    setEventIndex(-1);
-    setDisplayedCoins(20);
-
-    const gd = gameDataRef.current;
-    const r  = routeRef.current;
-
-    try {
-      const res = await submitRoute(gd.start.id, gd.destination.id, r);
-      if (user && typeof res.score === 'number') {
-        await saveScore(res.score).catch(() => {}); // non-fatal if fails
-      }
-      setResult(res);
-    } catch {
-      setError('Route submission failed.');
-      setPhase('setup');
-    }
-  }, [user]);
 
   // ── Execution animation ───────────────────────────────────────────────────
   useEffect(() => {
     if (phase !== 'executing' || !result) return;
 
     if (!result.valid) {
-      // invalid route: show the invalid screen briefly then move to result
       const t = setTimeout(() => setPhase('result'), 2000);
       return () => clearTimeout(t);
     }
 
     if (eventIndex < result.events.length - 1) {
-      // advance to the next event
       const delay = eventIndex === -1 ? 700 : 1800;
       const t = setTimeout(() => setEventIndex(i => i + 1), delay);
       return () => clearTimeout(t);
     }
 
-    // all events shown — transition to result
     const t = setTimeout(() => setPhase('result'), 1200);
     return () => clearTimeout(t);
   }, [phase, eventIndex, result]);
-
-  // sync the displayed coin counter as events are revealed
-  useEffect(() => {
-    if (eventIndex >= 0 && result?.events[eventIndex]) {
-      setDisplayedCoins(result.events[eventIndex].coinsAfter);
-    }
-  }, [eventIndex, result]);
 
   // ── Segment helpers ───────────────────────────────────────────────────────
   const stationName = (id) =>
@@ -136,11 +111,24 @@ function GamePage() {
   };
 
   const undoSegment = () => {
-    setRoute(prev => {
-      const next = prev.slice(0, -1);
-      setCurrentId(next.length > 0 ? next[next.length - 1].toId : gameData?.start.id ?? null);
-      return next;
-    });
+    const next = route.slice(0, -1);
+    setRoute(next);
+    setCurrentId(next.length > 0 ? next[next.length - 1].toId : gameData?.start.id ?? null);
+  };
+
+  const startPlanning = async () => {
+    setError('');
+    try {
+      const data = await getGameStart();
+      setGameData(data);
+      setCurrentId(data.start.id);
+      setRoute([]);
+      setTimeLeft(90);
+      hasSubmitted.current = false;
+      setPhase('planning');
+    } catch {
+      setError('Could not start the game. Please try again.');
+    }
   };
 
   const restart = () => {
@@ -148,9 +136,13 @@ function GamePage() {
     setRoute([]);
     setCurrentId(null);
     setEventIndex(-1);
-    setDisplayedCoins(20);
     setPhase('setup');
   };
+
+  // derived coin display — no separate effect needed
+  const displayedCoins = eventIndex >= 0 && result?.events[eventIndex]
+    ? result.events[eventIndex].coinsAfter
+    : 20;
 
   // ── Render ────────────────────────────────────────────────────────────────
 

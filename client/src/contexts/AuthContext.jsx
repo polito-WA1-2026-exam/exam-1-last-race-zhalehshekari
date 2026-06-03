@@ -1,14 +1,15 @@
-import { createContext, useContext, useState, useEffect } from 'react';
+import { createContext, useState, useEffect } from 'react';
 import { getSession, login as apiLogin, logout as apiLogout } from '../api';
 
 const AuthContext = createContext(null);
 
+export default AuthContext;
+
 export function AuthProvider({ children }) {
-  // null = not yet checked, false = anonymous, object = logged-in user
-  const [user, setUser]       = useState(null);
+  // null = checking session, false = anonymous, object = logged-in user
+  const [user,    setUser]    = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // check existing session on first mount
   useEffect(() => {
     getSession()
       .then(setUser)
@@ -32,9 +33,4 @@ export function AuthProvider({ children }) {
       {children}
     </AuthContext.Provider>
   );
-}
-
-// convenient hook
-export function useAuth() {
-  return useContext(AuthContext);
 }

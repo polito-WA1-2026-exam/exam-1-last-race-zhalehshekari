@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Table, Spinner, Alert } from 'react-bootstrap';
 import dayjs from 'dayjs';
 import { getRanking } from '../api';
-import { useAuth } from '../contexts/AuthContext';
+import { useAuth } from '../contexts/useAuth';
 
 function RankingPage() {
   const { user }              = useAuth();

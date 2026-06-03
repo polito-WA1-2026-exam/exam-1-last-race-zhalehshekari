@@ -1,6 +1,6 @@
 import { Navbar, Nav, Container, Button } from 'react-bootstrap';
 import { NavLink, useNavigate } from 'react-router-dom';
-import { useAuth } from '../contexts/AuthContext';
+import { useAuth } from '../contexts/useAuth';
 
 function AppNavbar() {
   const { user, logout } = useAuth();
