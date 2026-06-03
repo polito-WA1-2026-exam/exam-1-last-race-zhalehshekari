@@ -1,5 +1,5 @@
-# Exam #N: "Exam Title"
-## Student: s123456 LASTNAME FIRSTNAME 
+# Exam #1: "Last Race"
+## Student: s353869 SHEKARI ZHALEH
 
 ## React Client Application Routes
 
@@ -46,10 +46,8 @@ All routes are prefixed with `/api`.
   - No auth required
   - Picks a random start/destination pair with BFS distance ≥ 3
   - Response `200`: `{ start: {id, name, ...}, destination: {id, name, ...} }`
-  - Response `500`: if no valid pair can be found after 200 attempts
 
 - **`POST /api/game/submit`**
-  - No auth required (score saving is a separate call)
   - Body: `{ startId: int, destinationId: int, route: [{ fromId, toId, lineId }, ...] }`
   - Validates: start/end match, segments connect head-to-tail, each segment exists on the declared line, line changes occur only at interchange stations
   - Response `200` (invalid): `{ valid: false, score: 0, events: [] }`
@@ -106,20 +104,28 @@ All routes are prefixed with `/api`.
 
 ## Screenshot
 
-![Screenshot](./img/screenshot.jpg)
+*(To be added)*
+
+---
 
 ## Users Credentials
 
 | Username | Password |
 |---|---|
-| `alice` | `alice123` |
-| `bob` | `bob123` |
-| `charlie` | `charlie123` |
+| `zhaleh` | `zhaleh123` |
+| `pouria` | `pouria123` |
+| `ali` | `ali123` |
 
-Alice and Bob have pre-seeded score history. Charlie starts with no scores.
+Zhaleh and Pouria have pre-seeded score history. Ali starts with no scores.
 
 ---
 
 ## Use of AI Tools
-Briefly describe whether you used any AI tools (e.g., ChatGPT, GitHub Copilot, Claude) while working on this project, for which purposes (e.g., clarifying concepts, debugging, generating code), and how you verified or adapted their output.
-If you did not use any AI tools, simply state so.
+
+I used **Antigravity (Google DeepMind)** as an AI pair-programming assistant throughout this project. The tool helped with:
+
+- **Architecture planning**: designing the database schema, the 4-phase game state machine, and the Express API structure.
+- **Code generation**: scaffolding components, hooks, and route handlers that I then read, reviewed, and modified to fit the assignment requirements.
+- **Debugging**: identifying the ESLint errors in the hooks ordering and the React anti-pattern of calling `setState` inside another `setState`'s updater function.
+
+All generated code was reviewed line by line. Where the AI's output didn't match the specification (e.g., over-engineered abstractions), I asked it to simplify. The final implementation reflects my understanding of the assignment and the decisions I made throughout development.
