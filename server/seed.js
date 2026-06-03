@@ -208,9 +208,9 @@ const insertUser = db.prepare(
 );
 
 const users = [
-  { username: 'alice',   password: 'alice123'   },
-  { username: 'bob',     password: 'bob123'     },
-  { username: 'charlie', password: 'charlie123' },
+  { username: 'zhaleh', password: 'zhaleh123' },
+  { username: 'pouria', password: 'pouria123' },
+  { username: 'ali',    password: 'ali123'    },
 ];
 
 const userIds = {};
@@ -227,16 +227,17 @@ const insertScore = db.prepare(
   "INSERT INTO scores (user_id, score, played_at) VALUES (?, ?, ?)"
 );
 
-// alice and bob have existing game history
+// zhaleh and pouria have existing game history
+
 const history = [
-  // alice: 3 past games
-  { username: 'alice', score: 18, played_at: '2026-05-20 10:00:00' },
-  { username: 'alice', score: 22, played_at: '2026-05-22 15:30:00' },
-  { username: 'alice', score: 9,  played_at: '2026-05-25 09:00:00' },
-  // bob: 3 past games
-  { username: 'bob',   score: 25, played_at: '2026-05-21 11:00:00' },
-  { username: 'bob',   score: 14, played_at: '2026-05-23 17:00:00' },
-  { username: 'bob',   score: 30, played_at: '2026-05-28 20:00:00' },
+  // zhaleh: 3 past games
+  { username: 'zhaleh', score: 18, played_at: '2026-05-20 10:00:00' },
+  { username: 'zhaleh', score: 22, played_at: '2026-05-22 15:30:00' },
+  { username: 'zhaleh', score: 9,  played_at: '2026-05-25 09:00:00' },
+  // pouria: 3 past games
+  { username: 'pouria', score: 25, played_at: '2026-05-21 11:00:00' },
+  { username: 'pouria', score: 14, played_at: '2026-05-23 17:00:00' },
+  { username: 'pouria', score: 30, played_at: '2026-05-28 20:00:00' },
 ];
 
 for (const entry of history) {
