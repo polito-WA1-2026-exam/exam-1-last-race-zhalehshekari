@@ -347,20 +347,97 @@ body {
   gap: 0.5rem;
 }
 
-.move-btn {
-  background: #1e2130;
-  border: 1px solid var(--color-border);
-  color: var(--color-text);
-  padding: 0.4rem 1rem;
-  border-radius: 8px;
-  font-size: 0.9rem;
-  cursor: pointer;
-  transition: border-color 0.15s, background 0.15s;
+/* full scrollable segment list */
+.seg-list {
+  max-height: 220px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding-right: 4px;
 }
 
-.move-btn:hover {
+.seg-list::-webkit-scrollbar {
+  width: 5px;
+}
+
+.seg-list::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.seg-list::-webkit-scrollbar-thumb {
+  background: var(--color-border);
+  border-radius: 3px;
+}
+
+.seg-list-item {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  width: 100%;
+  padding: 0.45rem 0.75rem;
+  border-radius: 7px;
+  border: 1px solid transparent;
+  background: transparent;
+  text-align: left;
+  font-size: 0.88rem;
+  cursor: default;
+  transition: background 0.12s, border-color 0.12s;
+}
+
+.seg-connectable {
+  cursor: pointer;
+  color: var(--color-text);
+  border-color: var(--color-border);
+  background: #1e2130;
+}
+
+.seg-connectable:hover {
+  background: rgba(108, 99, 255, 0.15);
   border-color: var(--color-accent);
-  background: rgba(108, 99, 255, 0.1);
+}
+
+.seg-disabled {
+  color: var(--color-muted);
+  opacity: 0.35;
+  pointer-events: none;
+}
+
+/* already-selected segment — disabled but visually distinct */
+.seg-used {
+  color: #4ade80;
+  background: rgba(74, 222, 128, 0.06);
+  border-color: rgba(74, 222, 128, 0.2);
+  opacity: 0.7;
+  pointer-events: none;
+  cursor: default;
+}
+
+.seg-used .seg-dot {
+  background: #4ade80;
+}
+
+.seg-check {
+  margin-left: auto;
+  font-size: 0.75rem;
+  color: #4ade80;
+  font-weight: 700;
+}
+
+.seg-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--color-muted);
+  flex-shrink: 0;
+}
+
+.seg-connectable .seg-dot {
+  background: var(--color-accent);
+}
+
+.seg-dash {
+  color: var(--color-muted);
 }
 
 /* built route trail */

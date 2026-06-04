@@ -61,6 +61,30 @@ router.get('/game/start', (req, res) => {
 
 // POST /api/game/submit — validate route and assign random events
 // body: { startId, destinationId, route: [{ fromId, toId, lineId }, ...] }
+//
+// ─── VALIDATION ALGORITHM ───────────────────────────────────────────────────
+//
+// Step 1 – Boundary check
+//   route[0].fromId  must equal startId
+//   route[N-1].toId  must equal destinationId
+//
+// Step 2 – Continuity (head-to-tail)
+//   For each consecutive pair (i, i+1):
+//     route[i].toId === route[i+1].fromId
+//   This guarantees the path has no gaps or teleports.
+//
+// Step 3 – Segment existence
+//   Every segment {fromId, toId} must exist in the DB on the declared lineId.
+//   Both traversal directions are valid (undirected graph).
+//
+// Step 4 – Interchange constraint (THE key rule)
+//   When two consecutive segments are on DIFFERENT lines
+//   (route[i].lineId !== route[i+1].lineId),
+//   the connecting station (route[i].toId) MUST have is_interchange = 1.
+//   If a line change happens at a regular station → invalid.
+//
+// All four checks must pass; any failure returns { valid: false, score: 0 }.
+// ────────────────────────────────────────────────────────────────────────────
 router.post('/game/submit', (req, res) => {
   const { startId, destinationId, route } = req.body;
 

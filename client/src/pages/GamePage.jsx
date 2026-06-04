@@ -5,20 +5,32 @@ import { getNetwork, getGameStart, submitRoute, saveScore } from '../api';
 import { useAuth } from '../contexts/useAuth';
 import NetworkMap from '../components/NetworkMap';
 
+// Module-level Fisher-Yates shuffle — lives outside the component so the
+// React Compiler does not classify Math.random() as an impure render call.
+function shuffleArray(arr) {
+  const copy = [...arr];
+  for (let i = copy.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [copy[i], copy[j]] = [copy[j], copy[i]];
+  }
+  return copy;
+}
+
 function GamePage() {
   const { user }   = useAuth();
   const navigate   = useNavigate();
 
   // ── State ──────────────────────────────────────────────────────────────────
-  const [phase,      setPhase]      = useState('loading');
-  const [network,    setNetwork]    = useState(null);
-  const [gameData,   setGameData]   = useState(null);   // { start, destination }
-  const [route,      setRoute]      = useState([]);      // [{ fromId, toId, lineId }]
-  const [currentId,  setCurrentId]  = useState(null);
-  const [timeLeft,   setTimeLeft]   = useState(90);
-  const [result,     setResult]     = useState(null);   // server response
-  const [eventIndex, setEventIndex] = useState(-1);
-  const [error,      setError]      = useState('');
+  const [phase,        setPhase]        = useState('loading');
+  const [network,      setNetwork]      = useState(null);
+  const [gameData,     setGameData]     = useState(null);   // { start, destination }
+  const [route,        setRoute]        = useState([]);      // [{ fromId, toId, lineId }]
+  const [currentId,    setCurrentId]    = useState(null);
+  const [timeLeft,     setTimeLeft]     = useState(90);
+  const [result,       setResult]       = useState(null);   // server response
+  const [eventIndex,   setEventIndex]   = useState(-1);
+  const [shuffledSegs, setShuffledSegs] = useState([]);    // shuffled once per game
+  const [error,        setError]        = useState('');
 
   // refs so timer/async closures always read fresh values
   const routeRef     = useRef([]);
@@ -95,19 +107,45 @@ function GamePage() {
   const stationName = (id) =>
     network?.stations.find(s => s.id === id)?.name ?? String(id);
 
-  const getAvailableMoves = () => {
-    if (!network || currentId === null) return [];
-    return network.segments
-      .filter(s => s.from_station_id === currentId || s.to_station_id === currentId)
-      .map(s => {
-        const neighborId = s.from_station_id === currentId ? s.to_station_id : s.from_station_id;
-        return { fromId: currentId, toId: neighborId, lineId: s.line_id };
-      });
-  };
+  // Returns true if this physical segment (either direction) is already in the route.
+  // Used to prevent duplicate selections.
+  const isSegmentUsed = (seg) =>
+    route.some(r =>
+      (r.fromId === seg.from_station_id && r.toId === seg.to_station_id) ||
+      (r.fromId === seg.to_station_id   && r.toId === seg.from_station_id)
+    );
 
-  const addSegment = (move) => {
-    setRoute(prev => [...prev, move]);
-    setCurrentId(move.toId);
+  // Add a segment to the route.
+  //
+  // Direction algorithm (spec-exact):
+  //   currentId = the player's current station (start.id initially, updated each step).
+  //   Given segment with stationA (from_station_id) and stationB (to_station_id):
+  //     • If stationA === currentId  → player travels A→B (natural DB direction)
+  //     • If stationB === currentId  → player travels B→A (reversed)
+  //     • Neither matches            → disconnected click; stored in DB order so the
+  //                                    server's head-to-tail check rejects it on submit.
+  //
+  // All segments remain clickable; route validity is enforced at submission, not in the UI.
+  const clickSegment = (seg) => {
+    if (isSegmentUsed(seg)) return;   // only block exact duplicates
+
+    let fromId, toId;
+    if (seg.from_station_id === currentId) {
+      // Natural direction: current station is the FROM end
+      fromId = seg.from_station_id;
+      toId   = seg.to_station_id;
+    } else if (seg.to_station_id === currentId) {
+      // Reversed direction: current station is the TO end — flip
+      fromId = seg.to_station_id;
+      toId   = seg.from_station_id;
+    } else {
+      // Disconnected click — store in DB order; server will reject on submit
+      fromId = seg.from_station_id;
+      toId   = seg.to_station_id;
+    }
+
+    setRoute(prev => [...prev, { fromId, toId, lineId: seg.line_id }]);
+    setCurrentId(toId);
   };
 
   const undoSegment = () => {
@@ -125,6 +163,8 @@ function GamePage() {
       setRoute([]);
       setTimeLeft(90);
       hasSubmitted.current = false;
+      // Shuffle once per game and freeze the order for the whole planning phase
+      setShuffledSegs(shuffleArray(network.segments));
       setPhase('planning');
     } catch {
       setError('Could not start the game. Please try again.');
@@ -136,6 +176,7 @@ function GamePage() {
     setRoute([]);
     setCurrentId(null);
     setEventIndex(-1);
+    setShuffledSegs([]);
     setPhase('setup');
   };
 
@@ -143,6 +184,11 @@ function GamePage() {
   const displayedCoins = eventIndex >= 0 && result?.events[eventIndex]
     ? result.events[eventIndex].coinsAfter
     : 20;
+
+  // Holds the shuffled segment list for the current game session.
+  // Populated once inside startPlanning() via setShuffledSegs().
+  // Math.random() lives in the module-level shuffleArray() to satisfy
+  // the React Compiler's purity rule.
 
   // ── Render ────────────────────────────────────────────────────────────────
 
@@ -187,7 +233,6 @@ function GamePage() {
 
   // ── Phase 2: Planning ─────────────────────────────────────────────────────
   if (phase === 'planning') {
-    const moves      = getAvailableMoves();
     const atDest     = currentId === gameData?.destination.id;
     const timerPct   = (timeLeft / 90) * 100;
     const timerColor = timeLeft > 30 ? '#22c55e' : timeLeft > 10 ? '#f59e0b' : '#ef4444';
@@ -212,7 +257,7 @@ function GamePage() {
           </div>
         </div>
 
-        {/* map without line colors */}
+        {/* map — stations only, lines hidden */}
         <NetworkMap
           network={network}
           showLines={false}
@@ -222,21 +267,35 @@ function GamePage() {
           routeSegments={route}
         />
 
-        {/* segment selector */}
+        {/* full segment list + route */}
         <div className="planning-controls">
-          <div className="next-moves">
-            <p className="small text-secondary mb-2 fw-semibold">
-              {atDest
-                ? '✅ Destination reached!'
-                : `From ${stationName(currentId)}, go to:`}
+          {atDest ? (
+            <p className="small text-secondary fw-semibold mb-0">✅ Destination reached!</p>
+          ) : (
+            <p className="small text-secondary fw-semibold mb-2">
+              Select segments in sequence to build your route:
             </p>
-            <div className="moves-list">
-              {!atDest && moves.map(move => (
-                <button key={move.toId} className="move-btn" onClick={() => addSegment(move)}>
-                  {stationName(move.toId)}
+          )}
+
+          {/* scrollable list of ALL segments — all enabled except already-used ones */}
+          <div className="seg-list">
+            {shuffledSegs.map(seg => {
+              const used = isSegmentUsed(seg);
+              return (
+                <button
+                  key={seg.id}
+                  className={`seg-list-item ${used ? 'seg-used' : 'seg-connectable'}`}
+                  onClick={() => clickSegment(seg)}
+                  disabled={used}
+                >
+                  <span className="seg-dot" />
+                  {stationName(seg.from_station_id)}
+                  <span className="seg-dash"> — </span>
+                  {stationName(seg.to_station_id)}
+                  {used && <span className="seg-check">✓</span>}
                 </button>
-              ))}
-            </div>
+              );
+            })}
           </div>
 
           {/* built route trail */}
@@ -254,7 +313,7 @@ function GamePage() {
 
           <div className="planning-actions">
             {route.length > 0 && (
-              <button className="undo-btn" onClick={undoSegment}>↩ Undo</button>
+              <button className="undo-btn" onClick={undoSegment}>↩ Undo last</button>
             )}
             <Button className="btn-accent" disabled={!atDest} onClick={handleSubmit}>
               Submit Route

@@ -44,9 +44,11 @@ function NetworkMap({
           const to   = POS[seg.to_station_id];
           if (!from || !to) return null;
           const inRoute = isRouteSegment(seg.from_station_id, seg.to_station_id);
-          const stroke  = inRoute
-            ? '#a78bfa'
-            : showLines ? lineColor(seg.line_id) : '#383b4a';
+
+          // Phase 2: hide all lines — only show segments that are in the built route
+          if (!showLines && !inRoute) return null;
+
+          const stroke = inRoute ? '#a78bfa' : lineColor(seg.line_id);
           return (
             <line
               key={seg.id}
@@ -55,10 +57,10 @@ function NetworkMap({
               stroke={stroke}
               strokeWidth={inRoute ? 5 : 3}
               strokeLinecap="round"
-              opacity={inRoute ? 1 : 0.8}
             />
           );
         })}
+
 
         {/* ── Stations ── */}
         {stations.map(station => {
