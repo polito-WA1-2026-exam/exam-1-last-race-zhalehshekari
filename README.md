@@ -122,10 +122,4 @@ Zhaleh and Pouria have pre-seeded score history. Ali starts with no scores.
 
 ## Use of AI Tools
 
-I used **Antigravity (Google DeepMind)** as an AI pair-programming assistant throughout this project. The tool helped with:
-
-- **Architecture planning**: designing the database schema, the 4-phase game state machine, and the Express API structure.
-- **Code generation**: scaffolding components, hooks, and route handlers that I then read, reviewed, and modified to fit the assignment requirements.
-- **Debugging**: identifying the ESLint errors in the hooks ordering and the React anti-pattern of calling `setState` inside another `setState`'s updater function.
-
-All generated code was reviewed line by line. Where the AI's output didn't match the specification (e.g., over-engineered abstractions), I asked it to simplify. The final implementation reflects my understanding of the assignment and the decisions I made throughout development.
+Briefly describe whether you used any AI tools (e.g., ChatGPT, GitHub Copilot, Claude) while working on this project, for which purposes (e.g., clarifying concepts, debugging, generating code), and how you verified or adapted their output. If you did not use any AI tools, simply state so.
