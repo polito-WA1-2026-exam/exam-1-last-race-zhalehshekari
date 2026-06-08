@@ -62,11 +62,16 @@ router.get('/game/start', (req, res) => {
 // POST /api/game/submit — validate route and assign random events
 // body: { startId, destinationId, route: [{ fromId, toId, lineId }, ...] }
 //
-// ─── VALIDATION ALGORITHM ───────────────────────────────────────────────────
+// ─── VALIDATION ALGORITHM ──────────────────────────────────────────────────────────────────
 //
 // Step 1 – Boundary check
 //   route[0].fromId  must equal startId
 //   route[N-1].toId  must equal destinationId
+//
+// Step 1.5 – No duplicate segments
+//   A route may revisit the same station, but each segment (undirected)
+//   must appear at most once. Any repeated (A–B) or (B–A) pair is invalid.
+//   Canonical key: min(fromId, toId) + '-' + max(fromId, toId)
 //
 // Step 2 – Continuity (head-to-tail)
 //   For each consecutive pair (i, i+1):
@@ -83,7 +88,7 @@ router.get('/game/start', (req, res) => {
 //   the connecting station (route[i].toId) MUST have is_interchange = 1.
 //   If a line change happens at a regular station → invalid.
 //
-// All four checks must pass; any failure returns { valid: false, score: 0 }.
+// All steps must pass; any failure returns { valid: false, score: 0 }.
 // ────────────────────────────────────────────────────────────────────────────
 router.post('/game/submit', (req, res) => {
   const { startId, destinationId, route } = req.body;
@@ -97,6 +102,15 @@ router.post('/game/submit', (req, res) => {
   // 1. Check start and end match the declared stations
   if (route[0].fromId !== startId || route[route.length - 1].toId !== destinationId) {
     return res.json(invalid);
+  }
+
+  // 1.5 Check no segment is traversed more than once (stations may repeat, segments must not)
+  // Canonical key: min(fromId, toId)-max(fromId, toId) makes A→B and B→A identical.
+  const segKeys = new Set();
+  for (const seg of route) {
+    const key = `${Math.min(seg.fromId, seg.toId)}-${Math.max(seg.fromId, seg.toId)}`;
+    if (segKeys.has(key)) return res.json(invalid);
+    segKeys.add(key);
   }
 
   // 2. Check all segments connect head-to-tail

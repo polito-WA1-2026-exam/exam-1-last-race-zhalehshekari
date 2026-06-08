@@ -1,20 +1,20 @@
 // Station pixel positions for the SVG viewBox (0 0 600 450)
-// These match the seed IDs: 1=Central … 14=Newtown
+// These match the seed IDs: 1=Porta Susa … 14=Parella
 const POS = {
-  1:  [100, 75],   // Central      (Red + Blue)
-  2:  [225, 75],   // Riverside    (Red + Green)
-  3:  [345, 75],   // Oakwood      (Red + Blue)
-  4:  [465, 75],   // Lakeside     (Red + Yellow)
-  5:  [565, 75],   // Northgate    (Red)
-  6:  [100, 215],  // Hilltop      (Blue + Yellow)
-  7:  [280, 215],  // Westbridge   (Blue + Green)
-  8:  [405, 195],  // Eastfield    (Blue)
-  9:  [530, 195],  // Harbor       (Blue)
-  10: [185, 310],  // Meadow       (Green)
-  11: [315, 310],  // Junction     (Green + Yellow)
-  12: [450, 335],  // Southpark    (Green)
-  13: [100, 335],  // Uptown       (Yellow)
-  14: [100, 415],  // Newtown      (Yellow)
+  1:  [100, 75],   // Porta Susa    (Red + Blue)
+  2:  [225, 75],   // Porta Nuova   (Red + Green)
+  3:  [345, 75],   // Dante         (Red + Blue, not interchange)
+  4:  [465, 75],   // Lingotto      (Red + Yellow)
+  5:  [565, 75],   // Fermi         (Red)
+  6:  [100, 215],  // Re Umberto    (Blue + Yellow)
+  7:  [280, 215],  // Vinzaglio     (Blue + Green)
+  8:  [405, 195],  // Paradiso      (Blue)
+  9:  [530, 195],  // Marche        (Blue)
+  10: [185, 310],  // Massaua       (Green)
+  11: [315, 310],  // Nizza         (Green + Yellow)
+  12: [450, 335],  // Pozzo Strada  (Green)
+  13: [100, 335],  // Monte Grappa  (Yellow)
+  14: [100, 415],  // Parella       (Yellow)
 };
 
 function NetworkMap({

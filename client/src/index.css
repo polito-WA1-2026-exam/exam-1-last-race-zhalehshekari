@@ -258,11 +258,31 @@ body {
 
 /* ── Game: Planning Phase ── */
 .game-planning {
-  max-width: 720px;
+  max-width: 1100px;
   margin: 0 auto;
   display: flex;
   flex-direction: column;
   gap: 1rem;
+}
+
+/* two-column body — map left, controls right */
+.planning-body {
+  display: grid;
+  grid-template-columns: 1fr 340px;
+  gap: 1rem;
+  align-items: start;
+}
+
+.planning-map-col {
+  /* map takes available left width */
+  min-width: 0;
+}
+
+/* collapse to single column on small screens */
+@media (max-width: 700px) {
+  .planning-body {
+    grid-template-columns: 1fr;
+  }
 }
 
 .planning-topbar {
@@ -347,9 +367,9 @@ body {
   gap: 0.5rem;
 }
 
-/* full scrollable segment list */
+/* full scrollable segment list — taller in the side panel */
 .seg-list {
-  max-height: 220px;
+  max-height: 340px;
   overflow-y: auto;
   display: flex;
   flex-direction: column;

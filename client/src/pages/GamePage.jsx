@@ -233,7 +233,25 @@ function GamePage() {
 
   // ── Phase 2: Planning ─────────────────────────────────────────────────────
   if (phase === 'planning') {
-    const atDest     = currentId === gameData?.destination.id;
+    // atDest is true ONLY when ALL four conditions hold:
+    //   1. currentId is the destination
+    //   2. The route is non-empty
+    //   3. The first segment starts from the assigned starting station
+    //   4. Every consecutive pair of segments connects head-to-tail (no gaps)
+    //
+    // Condition 4 prevents a disconnected click on a segment that happens to
+    // end at the destination (e.g. Fermi→Lingotto already selected, then
+    // Paradiso→Marche clicked as a disconnected jump) from triggering this.
+    const isRouteContinuous =
+      route.length > 0 &&
+      route.every((seg, i) => i === 0 || seg.fromId === route[i - 1].toId);
+
+    const atDest =
+      currentId === gameData?.destination.id &&
+      route.length > 0 &&
+      route[0].fromId === gameData?.start.id &&
+      isRouteContinuous;
+
     const timerPct   = (timeLeft / 90) * 100;
     const timerColor = timeLeft > 30 ? '#22c55e' : timeLeft > 10 ? '#f59e0b' : '#ef4444';
 
@@ -257,67 +275,72 @@ function GamePage() {
           </div>
         </div>
 
-        {/* map — stations only, lines hidden */}
-        <NetworkMap
-          network={network}
-          showLines={false}
-          startId={gameData.start.id}
-          destId={gameData.destination.id}
-          currentId={currentId}
-          routeSegments={route}
-        />
-
-        {/* full segment list + route */}
-        <div className="planning-controls">
-          {atDest ? (
-            <p className="small text-secondary fw-semibold mb-0">✅ Destination reached!</p>
-          ) : (
-            <p className="small text-secondary fw-semibold mb-2">
-              Select segments in sequence to build your route:
-            </p>
-          )}
-
-          {/* scrollable list of ALL segments — all enabled except already-used ones */}
-          <div className="seg-list">
-            {shuffledSegs.map(seg => {
-              const used = isSegmentUsed(seg);
-              return (
-                <button
-                  key={seg.id}
-                  className={`seg-list-item ${used ? 'seg-used' : 'seg-connectable'}`}
-                  onClick={() => clickSegment(seg)}
-                  disabled={used}
-                >
-                  <span className="seg-dot" />
-                  {stationName(seg.from_station_id)}
-                  <span className="seg-dash"> — </span>
-                  {stationName(seg.to_station_id)}
-                  {used && <span className="seg-check">✓</span>}
-                </button>
-              );
-            })}
+        {/* two-column body: map left, controls right */}
+        <div className="planning-body">
+          {/* map — stations only, lines hidden */}
+          <div className="planning-map-col">
+            <NetworkMap
+              network={network}
+              showLines={false}
+              startId={gameData.start.id}
+              destId={gameData.destination.id}
+              currentId={currentId}
+              routeSegments={route}
+            />
           </div>
 
-          {/* built route trail */}
-          {route.length > 0 && (
-            <div className="route-trail">
-              <span className="route-station">{stationName(gameData.start.id)}</span>
-              {route.map((r, i) => (
-                <span key={i}>
-                  <span className="route-arrow">→</span>
-                  <span className="route-station">{stationName(r.toId)}</span>
-                </span>
-              ))}
-            </div>
-          )}
-
-          <div className="planning-actions">
-            {route.length > 0 && (
-              <button className="undo-btn" onClick={undoSegment}>↩ Undo last</button>
+          {/* segment list + route trail + actions */}
+          <div className="planning-controls">
+            {atDest ? (
+              <p className="small text-secondary fw-semibold mb-0">✅ Destination reached!</p>
+            ) : (
+              <p className="small text-secondary fw-semibold mb-2">
+                Select segments in sequence to build your route:
+              </p>
             )}
-            <Button className="btn-accent" disabled={!atDest} onClick={handleSubmit}>
-              Submit Route
-            </Button>
+
+            {/* scrollable list of ALL segments — all enabled except already-used ones */}
+            <div className="seg-list">
+              {shuffledSegs.map(seg => {
+                const used = isSegmentUsed(seg);
+                return (
+                  <button
+                    key={seg.id}
+                    className={`seg-list-item ${used ? 'seg-used' : 'seg-connectable'}`}
+                    onClick={() => clickSegment(seg)}
+                    disabled={used}
+                  >
+                    <span className="seg-dot" />
+                    {stationName(seg.from_station_id)}
+                    <span className="seg-dash"> — </span>
+                    {stationName(seg.to_station_id)}
+                    {used && <span className="seg-check">✓</span>}
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* built route trail */}
+            {route.length > 0 && (
+              <div className="route-trail">
+                <span className="route-station">{stationName(gameData.start.id)}</span>
+                {route.map((r, i) => (
+                  <span key={i}>
+                    <span className="route-arrow">→</span>
+                    <span className="route-station">{stationName(r.toId)}</span>
+                  </span>
+                ))}
+              </div>
+            )}
+
+            <div className="planning-actions">
+              {route.length > 0 && (
+                <button className="undo-btn" onClick={undoSegment}>↩ Undo last</button>
+              )}
+              <Button className="btn-accent" disabled={!atDest} onClick={handleSubmit}>
+                Submit Route
+              </Button>
+            </div>
           </div>
         </div>
       </div>

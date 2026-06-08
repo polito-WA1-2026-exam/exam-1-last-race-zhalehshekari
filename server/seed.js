@@ -85,16 +85,19 @@ const lineYellow = insertLine.run('Yellow Line', '#FDD835').lastInsertRowid;
 console.log('Lines inserted.');
 
 // ── Stations ─────────────────────────────────────────────────────────────────
-// Network layout (15 stations, 5 interchanges)
+// Network layout (14 stations, 6 interchanges) — Torino Metro Line 1 station names
+// Interchange rule: interchanges must not exceed half the total station count.
+// 6 / 14 ≈ 43%  ✓
 //
-//  Red:    Central ── Riverside ── Oakwood ── Lakeside ── Northgate
-//  Blue:   Central ── Hilltop ── Westbridge ── Oakwood ── Eastfield ── Harbor
-//  Green:  Riverside ── Meadow ── Junction ── Westbridge ── Southpark
-//  Yellow: Lakeside ── Junction ── Hilltop ── Uptown ── Newtown
+//  Red:    Porta Susa ── Porta Nuova ── Dante ── Lingotto ── Fermi
+//  Blue:   Porta Susa ── Re Umberto ── Vinzaglio ── Dante ── Paradiso ── Marche
+//  Green:  Porta Nuova ── Massaua ── Nizza ── Vinzaglio ── Pozzo Strada
+//  Yellow: Lingotto ── Nizza ── Re Umberto ── Monte Grappa ── Parella
 //
-//  Interchanges: Central (R+B), Riverside (R+G), Oakwood (R+B),
-//                Westbridge (B+G), Lakeside (R+Y), Hilltop (B+Y),
-//                Junction (G+Y)
+//  Interchanges (6): Porta Susa (R+B), Porta Nuova (R+G),
+//                    Vinzaglio (B+G), Lingotto (R+Y),
+//                    Re Umberto (B+Y), Nizza (G+Y)
+//  Regular (8): Dante, Fermi, Paradiso, Marche, Massaua, Pozzo Strada, Monte Grappa, Parella
 
 const insertStation = db.prepare(
   'INSERT INTO stations (name, is_interchange) VALUES (?, ?)'
@@ -102,20 +105,20 @@ const insertStation = db.prepare(
 
 // [name, is_interchange]
 const stationDefs = [
-  ['Central',    1],  // Red + Blue
-  ['Riverside',  1],  // Red + Green
-  ['Oakwood',    1],  // Red + Blue
-  ['Lakeside',   1],  // Red + Yellow
-  ['Northgate',  0],  // Red terminus
-  ['Hilltop',    1],  // Blue + Yellow
-  ['Westbridge', 1],  // Blue + Green
-  ['Eastfield',  0],  // Blue
-  ['Harbor',     0],  // Blue terminus
-  ['Meadow',     0],  // Green
-  ['Junction',   1],  // Green + Yellow
-  ['Southpark',  0],  // Green terminus
-  ['Uptown',     0],  // Yellow
-  ['Newtown',    0],  // Yellow terminus
+  ['Porta Susa',   1],  // Red + Blue  (interchange)
+  ['Porta Nuova',  1],  // Red + Green (interchange)
+  ['Dante',        0],  // Red + Blue  — NOT an interchange (demoted to keep count ≤ 50%)
+  ['Lingotto',     1],  // Red + Yellow (interchange)
+  ['Fermi',        0],  // Red terminus
+  ['Re Umberto',   1],  // Blue + Yellow (interchange)
+  ['Vinzaglio',    1],  // Blue + Green  (interchange)
+  ['Paradiso',     0],  // Blue
+  ['Marche',       0],  // Blue terminus
+  ['Massaua',      0],  // Green
+  ['Nizza',        1],  // Green + Yellow (interchange)
+  ['Pozzo Strada', 0],  // Green terminus
+  ['Monte Grappa', 0],  // Yellow
+  ['Parella',      0],  // Yellow terminus
 ];
 
 const stationIds = {};
@@ -132,10 +135,10 @@ const insertSL = db.prepare(
 );
 
 const lineStations = {
-  [lineRed]:    ['Central', 'Riverside', 'Oakwood', 'Lakeside', 'Northgate'],
-  [lineBlue]:   ['Central', 'Hilltop', 'Westbridge', 'Oakwood', 'Eastfield', 'Harbor'],
-  [lineGreen]:  ['Riverside', 'Meadow', 'Junction', 'Westbridge', 'Southpark'],
-  [lineYellow]: ['Lakeside', 'Junction', 'Hilltop', 'Uptown', 'Newtown'],
+  [lineRed]:    ['Porta Susa', 'Porta Nuova', 'Dante', 'Lingotto', 'Fermi'],
+  [lineBlue]:   ['Porta Susa', 'Re Umberto', 'Vinzaglio', 'Dante', 'Paradiso', 'Marche'],
+  [lineGreen]:  ['Porta Nuova', 'Massaua', 'Nizza', 'Vinzaglio', 'Pozzo Strada'],
+  [lineYellow]: ['Lingotto', 'Nizza', 'Re Umberto', 'Monte Grappa', 'Parella'],
 };
 
 for (const [lineId, names] of Object.entries(lineStations)) {
@@ -158,10 +161,10 @@ const addSegments = (lineId, names) => {
   }
 };
 
-addSegments(lineRed,    ['Central', 'Riverside', 'Oakwood', 'Lakeside', 'Northgate']);
-addSegments(lineBlue,   ['Central', 'Hilltop', 'Westbridge', 'Oakwood', 'Eastfield', 'Harbor']);
-addSegments(lineGreen,  ['Riverside', 'Meadow', 'Junction', 'Westbridge', 'Southpark']);
-addSegments(lineYellow, ['Lakeside', 'Junction', 'Hilltop', 'Uptown', 'Newtown']);
+addSegments(lineRed,    ['Porta Susa', 'Porta Nuova', 'Dante', 'Lingotto', 'Fermi']);
+addSegments(lineBlue,   ['Porta Susa', 'Re Umberto', 'Vinzaglio', 'Dante', 'Paradiso', 'Marche']);
+addSegments(lineGreen,  ['Porta Nuova', 'Massaua', 'Nizza', 'Vinzaglio', 'Pozzo Strada']);
+addSegments(lineYellow, ['Lingotto', 'Nizza', 'Re Umberto', 'Monte Grappa', 'Parella']);
 
 console.log('Segments inserted.');
 
