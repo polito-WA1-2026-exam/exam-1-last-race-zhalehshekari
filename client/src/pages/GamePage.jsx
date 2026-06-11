@@ -89,7 +89,7 @@ function GamePage() {
     if (phase !== 'executing' || !result) return;
 
     if (!result.valid) {
-      const t = setTimeout(() => setPhase('result'), 2000);
+      const t = setTimeout(() => navigate('/result', { state: { result, gameData: gameDataRef.current, network } }), 2000);
       return () => clearTimeout(t);
     }
 
@@ -99,9 +99,9 @@ function GamePage() {
       return () => clearTimeout(t);
     }
 
-    const t = setTimeout(() => setPhase('result'), 1200);
+    const t = setTimeout(() => navigate('/result', { state: { result, gameData: gameDataRef.current, network } }), 1200);
     return () => clearTimeout(t);
-  }, [phase, eventIndex, result]);
+  }, [phase, eventIndex, result, navigate, network]);
 
   // ── Segment helpers ───────────────────────────────────────────────────────
   const stationName = (id) =>
@@ -171,14 +171,6 @@ function GamePage() {
     }
   };
 
-  const restart = () => {
-    setResult(null);
-    setRoute([]);
-    setCurrentId(null);
-    setEventIndex(-1);
-    setShuffledSegs([]);
-    setPhase('setup');
-  };
 
   // derived coin display — no separate effect needed
   const displayedCoins = eventIndex >= 0 && result?.events[eventIndex]
@@ -233,25 +225,6 @@ function GamePage() {
 
   // ── Phase 2: Planning ─────────────────────────────────────────────────────
   if (phase === 'planning') {
-    // atDest is true ONLY when ALL four conditions hold:
-    //   1. currentId is the destination
-    //   2. The route is non-empty
-    //   3. The first segment starts from the assigned starting station
-    //   4. Every consecutive pair of segments connects head-to-tail (no gaps)
-    //
-    // Condition 4 prevents a disconnected click on a segment that happens to
-    // end at the destination (e.g. Fermi→Lingotto already selected, then
-    // Paradiso→Marche clicked as a disconnected jump) from triggering this.
-    const isRouteContinuous =
-      route.length > 0 &&
-      route.every((seg, i) => i === 0 || seg.fromId === route[i - 1].toId);
-
-    const atDest =
-      currentId === gameData?.destination.id &&
-      route.length > 0 &&
-      route[0].fromId === gameData?.start.id &&
-      isRouteContinuous;
-
     const timerPct   = (timeLeft / 90) * 100;
     const timerColor = timeLeft > 30 ? '#22c55e' : timeLeft > 10 ? '#f59e0b' : '#ef4444';
 
@@ -289,15 +262,11 @@ function GamePage() {
             />
           </div>
 
-          {/* segment list + route trail + actions */}
+          {/* segment list + actions */}
           <div className="planning-controls">
-            {atDest ? (
-              <p className="small text-secondary fw-semibold mb-0">✅ Destination reached!</p>
-            ) : (
-              <p className="small text-secondary fw-semibold mb-2">
-                Select segments in sequence to build your route:
-              </p>
-            )}
+            <p className="small text-secondary fw-semibold mb-2">
+              Select segments to build your route:
+            </p>
 
             {/* scrollable list of ALL segments — all enabled except already-used ones */}
             <div className="seg-list">
@@ -320,24 +289,13 @@ function GamePage() {
               })}
             </div>
 
-            {/* built route trail */}
-            {route.length > 0 && (
-              <div className="route-trail">
-                <span className="route-station">{stationName(gameData.start.id)}</span>
-                {route.map((r, i) => (
-                  <span key={i}>
-                    <span className="route-arrow">→</span>
-                    <span className="route-station">{stationName(r.toId)}</span>
-                  </span>
-                ))}
-              </div>
-            )}
 
             <div className="planning-actions">
               {route.length > 0 && (
                 <button className="undo-btn" onClick={undoSegment}>↩ Undo last</button>
               )}
-              <Button className="btn-accent" disabled={!atDest} onClick={handleSubmit}>
+              {/* Submit is always enabled — player may submit at any time */}
+              <Button className="btn-accent" onClick={handleSubmit}>
                 Submit Route
               </Button>
             </div>
@@ -381,6 +339,7 @@ function GamePage() {
 
     return (
       <div className="game-executing">
+        {/* full-width header */}
         <div className="exec-header">
           <h2 className="h5 mb-0 fw-bold">🚇 Journey in progress…</h2>
           <span className="exec-progress">
@@ -388,88 +347,58 @@ function GamePage() {
           </span>
         </div>
 
-        <NetworkMap
-          network={network}
-          showLines={false}
-          startId={gameData?.start.id}
-          destId={gameData?.destination.id}
-          routeSegments={processedSegs}
-        />
+        {/* two-column body: map left, event panel right */}
+        <div className="exec-body">
+          <div className="exec-map-col">
+            <NetworkMap
+              network={network}
+              showLines={false}
+              startId={gameData?.start.id}
+              destId={gameData?.destination.id}
+              routeSegments={processedSegs}
+            />
+          </div>
 
-        <div className="exec-event-area">
-          {currentEvent ? (
-            <div className="exec-event-card">
-              <div className="exec-segment-label">
-                🚉 {stationName(currentEvent.segmentFrom)} → {stationName(currentEvent.segmentTo)}
-              </div>
-              <p className="exec-event-desc">"{currentEvent.description}"</p>
-              <div className="exec-coins-row">
-                <span className={`exec-effect ${currentEvent.coin_effect >= 0 ? 'positive' : 'negative'}`}>
-                  {currentEvent.coin_effect >= 0 ? '+' : ''}{currentEvent.coin_effect} 🪙
-                </span>
-                <span className="exec-coins-total">{displayedCoins} coins remaining</span>
-              </div>
+          <div className="exec-panel-col">
+            {/* coin counter */}
+            <div className="exec-coins-banner">
+              <span className="exec-coins-icon">🪙</span>
+              <span className="exec-coins-value">{displayedCoins}</span>
+              <span className="exec-coins-label">coins</span>
             </div>
-          ) : (
-            <div className="exec-event-card loading-card">
-              <Spinner animation="border" size="sm" variant="light" />
-              <span className="ms-2 text-secondary">Boarding first segment…</span>
-            </div>
-          )}
-        </div>
-      </div>
-    );
-  }
 
-  // ── Phase 4: Result ───────────────────────────────────────────────────────
-  if (phase === 'result' && result) {
-    return (
-      <div className="game-result">
-        <div className="result-card">
-          {result.valid ? (
-            <>
-              <div className="result-icon">🏁</div>
-              <h2 className="h4 fw-bold mb-0">Journey Complete!</h2>
-              <p className="text-secondary small mb-2">Final score</p>
-              <div className="result-score">{result.score}</div>
-              <p className="result-coins-label">coins</p>
-            </>
-          ) : (
-            <>
-              <div className="result-icon">❌</div>
-              <h2 className="h4 fw-bold mb-0">Invalid Route</h2>
-              <p className="text-secondary small mb-2">Score reset to 0</p>
-              <div className="result-score" style={{ color: '#ef4444' }}>0</div>
-              <p className="result-coins-label">coins</p>
-            </>
-          )}
-
-          {/* event log — only for valid routes */}
-          {result.valid && result.events.length > 0 && (
-            <div className="event-log">
-              <p className="event-log-title">Event log</p>
-              {result.events.map((ev, i) => (
-                <div key={i} className="event-log-row">
-                  <span className="event-log-seg">
-                    {stationName(ev.segmentFrom)} → {stationName(ev.segmentTo)}
-                  </span>
-                  <span className="event-log-desc">{ev.description}</span>
-                  <span className={`event-log-effect ${ev.coin_effect >= 0 ? 'pos' : 'neg'}`}>
-                    {ev.coin_effect >= 0 ? '+' : ''}{ev.coin_effect}
-                  </span>
-                  <span className="event-log-after">{ev.coinsAfter} 🪙</span>
+            {/* current event card */}
+            <div className="exec-event-area">
+              {currentEvent ? (
+                <div className="exec-event-card">
+                  <div className="exec-segment-label">
+                    🚉 {stationName(currentEvent.segmentFrom)} → {stationName(currentEvent.segmentTo)}
+                  </div>
+                  <p className="exec-event-desc">"{currentEvent.description}"</p>
+                  <div className="exec-coins-row">
+                    <span className={`exec-effect ${currentEvent.coin_effect >= 0 ? 'positive' : 'negative'}`}>
+                      {currentEvent.coin_effect >= 0 ? '+' : ''}{currentEvent.coin_effect} 🪙
+                    </span>
+                    <span className="exec-coins-total">{displayedCoins} remaining</span>
+                  </div>
                 </div>
+              ) : (
+                <div className="exec-event-card loading-card">
+                  <Spinner animation="border" size="sm" variant="light" />
+                  <span className="ms-2 text-secondary">Boarding first segment…</span>
+                </div>
+              )}
+            </div>
+
+            {/* mini progress dots */}
+            <div className="exec-dots">
+              {result.events.map((_, i) => (
+                <span
+                  key={i}
+                  className={`exec-dot ${i <= eventIndex ? 'exec-dot-done' : ''}`}
+                />
               ))}
             </div>
-          )}
-
-          <div className="result-actions">
-            <Button className="btn-accent px-4" onClick={restart}>Play Again</Button>
-            {user && (
-              <Button variant="outline-light" onClick={() => navigate('/ranking')}>
-                View Ranking
-              </Button>
-            )}
           </div>
         </div>
       </div>

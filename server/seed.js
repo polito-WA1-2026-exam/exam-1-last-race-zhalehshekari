@@ -77,9 +77,9 @@ console.log('Tables created.');
 
 const insertLine = db.prepare('INSERT INTO lines (name, color) VALUES (?, ?)');
 
-const lineRed    = insertLine.run('Red Line',    '#E53935').lastInsertRowid;
-const lineBlue   = insertLine.run('Blue Line',   '#1E88E5').lastInsertRowid;
-const lineGreen  = insertLine.run('Green Line',  '#43A047').lastInsertRowid;
+const lineRed = insertLine.run('Red Line', '#E53935').lastInsertRowid;
+const lineBlue = insertLine.run('Blue Line', '#1E88E5').lastInsertRowid;
+const lineGreen = insertLine.run('Green Line', '#43A047').lastInsertRowid;
 const lineYellow = insertLine.run('Yellow Line', '#FDD835').lastInsertRowid;
 
 console.log('Lines inserted.');
@@ -105,20 +105,20 @@ const insertStation = db.prepare(
 
 // [name, is_interchange]
 const stationDefs = [
-  ['Porta Susa',   1],  // Red + Blue  (interchange)
-  ['Porta Nuova',  1],  // Red + Green (interchange)
-  ['Dante',        0],  // Red + Blue  — NOT an interchange (demoted to keep count ≤ 50%)
-  ['Lingotto',     1],  // Red + Yellow (interchange)
-  ['Fermi',        0],  // Red terminus
-  ['Re Umberto',   1],  // Blue + Yellow (interchange)
-  ['Vinzaglio',    1],  // Blue + Green  (interchange)
-  ['Paradiso',     0],  // Blue
-  ['Marche',       0],  // Blue terminus
-  ['Massaua',      0],  // Green
-  ['Nizza',        1],  // Green + Yellow (interchange)
+  ['Porta Susa', 1],  // Red + Blue  (interchange)
+  ['Porta Nuova', 1],  // Red + Green (interchange)
+  ['Dante', 0],  // Red + Blue  — NOT an interchange (demoted to keep count ≤ 50%)
+  ['Lingotto', 1],  // Red + Yellow (interchange)
+  ['Fermi', 0],  // Red terminus
+  ['Re Umberto', 1],  // Blue + Yellow (interchange)
+  ['Vinzaglio', 1],  // Blue + Green  (interchange)
+  ['Paradiso', 0],  // Blue
+  ['Marche', 0],  // Blue terminus
+  ['Massaua', 0],  // Green
+  ['Nizza', 1],  // Green + Yellow (interchange)
   ['Pozzo Strada', 0],  // Green terminus
   ['Monte Grappa', 0],  // Yellow
-  ['Parella',      0],  // Yellow terminus
+  ['Parella', 0],  // Yellow terminus
 ];
 
 const stationIds = {};
@@ -135,9 +135,9 @@ const insertSL = db.prepare(
 );
 
 const lineStations = {
-  [lineRed]:    ['Porta Susa', 'Porta Nuova', 'Dante', 'Lingotto', 'Fermi'],
-  [lineBlue]:   ['Porta Susa', 'Re Umberto', 'Vinzaglio', 'Dante', 'Paradiso', 'Marche'],
-  [lineGreen]:  ['Porta Nuova', 'Massaua', 'Nizza', 'Vinzaglio', 'Pozzo Strada'],
+  [lineRed]: ['Porta Susa', 'Porta Nuova', 'Dante', 'Lingotto', 'Fermi'],
+  [lineBlue]: ['Porta Susa', 'Re Umberto', 'Vinzaglio', 'Dante', 'Paradiso', 'Marche'],
+  [lineGreen]: ['Porta Nuova', 'Massaua', 'Nizza', 'Vinzaglio', 'Pozzo Strada'],
   [lineYellow]: ['Lingotto', 'Nizza', 'Re Umberto', 'Monte Grappa', 'Parella'],
 };
 
@@ -161,9 +161,9 @@ const addSegments = (lineId, names) => {
   }
 };
 
-addSegments(lineRed,    ['Porta Susa', 'Porta Nuova', 'Dante', 'Lingotto', 'Fermi']);
-addSegments(lineBlue,   ['Porta Susa', 'Re Umberto', 'Vinzaglio', 'Dante', 'Paradiso', 'Marche']);
-addSegments(lineGreen,  ['Porta Nuova', 'Massaua', 'Nizza', 'Vinzaglio', 'Pozzo Strada']);
+addSegments(lineRed, ['Porta Susa', 'Porta Nuova', 'Dante', 'Lingotto', 'Fermi']);
+addSegments(lineBlue, ['Porta Susa', 'Re Umberto', 'Vinzaglio', 'Dante', 'Paradiso', 'Marche']);
+addSegments(lineGreen, ['Porta Nuova', 'Massaua', 'Nizza', 'Vinzaglio', 'Pozzo Strada']);
 addSegments(lineYellow, ['Lingotto', 'Nizza', 'Re Umberto', 'Monte Grappa', 'Parella']);
 
 console.log('Segments inserted.');
@@ -175,25 +175,15 @@ const insertEvent = db.prepare(
 );
 
 const events = [
-  // positive
-  ['You found a forgotten monthly pass on the seat!', 4],
-  ['A kind commuter paid for your fare. Lucky day!', 3],
-  ['Flash sale on the transit app — partial refund credited.', 2],
-  ['The train skipped a closed station, cutting your time short.', 1],
-  // neutral
-  ['Smooth ride, no surprises. Nothing gained, nothing lost.', 0],
-  // negative
-  ['Unexpected detour: you had to buy a new single ticket.', -1],
-  ['A delay meant you missed a connection and paid a penalty fare.', -2],
-  ['Your contactless card failed; you paid cash at full price.', -3],
-  ['Inspectors checked tickets — yours was invalid for this zone.', -4],
-  // extra variety
-  ['A street performer distracted you — you boarded the wrong car.', -1],
-  ['You won a station raffle: free ride coupon!', 2],
-  ['Signal failure caused a partial refund from the operator.', 1],
-  ['Overcrowding meant a bus bridge with an extra charge.', -2],
-  ['You helped a tourist and they gifted you a transit token.', 3],
-  ['Your bag got caught in the door; small incident charge.', -1],
+  ['Free pass found!', 4],  // +4
+  ['Stranger paid fare.', 3],  // +3
+  ['Discount applied.', 2],  // +2
+  ['Train skipped stop.', 1],  // +1
+  ['Smooth ride today.', 0],  //  0
+  ['Bought extra ticket.', -1],  // -1
+  ['Delay, missed train.', -2],  // -2
+  ['Card declined, cash.', -3],  // -3
+  ['Wrong zone ticket.', -4],  // -4
 ];
 
 for (const [desc, effect] of events) {
@@ -213,7 +203,7 @@ const insertUser = db.prepare(
 const users = [
   { username: 'zhaleh', password: 'zhaleh123' },
   { username: 'pouria', password: 'pouria123' },
-  { username: 'ali',    password: 'ali123'    },
+  { username: 'ali', password: 'ali123' },
 ];
 
 const userIds = {};
@@ -235,12 +225,12 @@ const insertScore = db.prepare(
 const history = [
   // zhaleh: 3 past games
   { username: 'zhaleh', score: 18, played_at: '2026-05-20 10:00:00' },
-  { username: 'zhaleh', score: 22, played_at: '2026-05-22 15:30:00' },
-  { username: 'zhaleh', score: 9,  played_at: '2026-05-25 09:00:00' },
+  { username: 'zhaleh', score: 27, played_at: '2026-05-22 15:30:00' },
+  { username: 'zhaleh', score: 9, played_at: '2026-05-25 09:00:00' },
   // pouria: 3 past games
   { username: 'pouria', score: 25, played_at: '2026-05-21 11:00:00' },
   { username: 'pouria', score: 14, played_at: '2026-05-23 17:00:00' },
-  { username: 'pouria', score: 30, played_at: '2026-05-28 20:00:00' },
+  { username: 'pouria', score: 28, played_at: '2026-05-28 20:00:00' },
 ];
 
 for (const entry of history) {

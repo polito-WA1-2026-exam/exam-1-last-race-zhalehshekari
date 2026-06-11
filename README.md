@@ -73,7 +73,7 @@ All routes are prefixed with `/api`.
 | `stations` | Network stations. Columns: `id`, `name`, `is_interchange` (1 if served by > 1 line). 14 stations named after real Torino Metro Line 1 stops, 6 interchanges (≤ half the total, per spec). |
 | `station_lines` | Many-to-many join: which lines stop at which station. Columns: `station_id`, `line_id`. |
 | `segments` | Direct connections between consecutive stations on a line. Columns: `id`, `line_id`, `from_station_id`, `to_station_id`. 17 segments total. Traversal is bidirectional. |
-| `events` | Random journey events. Columns: `id`, `description`, `coin_effect` (range −4 to +4). 15 events seeded. |
+| `events` | Random journey events. Columns: `id`, `description`, `coin_effect` (range −4 to +4). 9 events seeded. |
 | `scores` | Saved game results (logged-in players only). Columns: `id`, `user_id`, `score`, `played_at` (UTC datetime). |
 
 ---

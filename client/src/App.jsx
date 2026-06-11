@@ -8,6 +8,7 @@ import HomePage from './pages/HomePage';
 import LoginPage from './pages/LoginPage';
 import RankingPage from './pages/RankingPage';
 import GamePage from './pages/GamePage';
+import ResultPage from './pages/ResultPage';
 
 // redirect to / if not logged in
 function ProtectedRoute({ children }) {
@@ -60,6 +61,14 @@ function AppRoutes() {
             element={
               <ProtectedRoute>
                 <GamePage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/result"
+            element={
+              <ProtectedRoute>
+                <ResultPage />
               </ProtectedRoute>
             }
           />

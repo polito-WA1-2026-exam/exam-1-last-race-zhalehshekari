@@ -180,6 +180,12 @@ router.get('/ranking', isLoggedIn, (req, res) => {
     SELECT u.username, s.score, s.played_at
     FROM scores s
     JOIN users u ON s.user_id = u.id
+    WHERE s.id = (
+      SELECT id FROM scores s2
+      WHERE s2.user_id = s.user_id
+      ORDER BY s2.score DESC, s2.played_at ASC
+      LIMIT 1
+    )
     ORDER BY s.score DESC, s.played_at ASC
   `).all();
   res.json(ranking);
