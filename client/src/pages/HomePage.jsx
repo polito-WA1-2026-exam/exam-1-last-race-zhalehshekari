@@ -32,9 +32,6 @@ function HomePage() {
       <div className="home-hero">
         <span className="home-icon">🚇</span>
         <h1 className="display-5 fw-bold mb-2">Last Race</h1>
-        <p className="lead text-secondary">
-          A transit network strategy game. Pick your route. Beat the odds.
-        </p>
         <Button
           className="btn-accent mt-3 px-4 py-2"
           onClick={() => navigate('/login')}
@@ -55,7 +52,7 @@ function HomePage() {
 
       <p className="text-secondary small mt-4">
         Line changes are only allowed at <strong>interchange stations</strong>.
-        Plan carefully — a broken route loses everything.
+        Plan carefully, a broken route loses everything.
       </p>
     </div>
   );

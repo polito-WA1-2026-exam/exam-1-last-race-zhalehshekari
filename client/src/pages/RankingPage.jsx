@@ -98,7 +98,7 @@ function RankingPage() {
                           {entry.score}
                         </td>
                         <td className="text-end text-muted-custom small pe-4">
-                          {dayjs(entry.played_at).format('MMM D, YYYY')}
+                          {dayjs(entry.played_at).format('MMM D, YYYY HH:mm')}
                         </td>
                       </tr>
                     );

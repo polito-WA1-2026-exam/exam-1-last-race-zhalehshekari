@@ -62,6 +62,74 @@ body {
   text-align: left;
 }
 
+/* demo credentials hint panel */
+.demo-credentials {
+  margin-top: 1.5rem;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  padding: 1rem 1.25rem;
+  text-align: left;
+}
+
+.demo-credentials-title {
+  font-size: 0.72rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--color-muted);
+  margin-bottom: 0.6rem;
+}
+
+.demo-credentials-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.demo-credential-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  border-radius: 8px;
+  padding: 0.5rem 0.75rem;
+}
+
+.demo-username {
+  font-family: 'Courier New', monospace;
+  font-weight: 700;
+  font-size: 0.9rem;
+  color: var(--color-text);
+  min-width: 70px;
+}
+
+.demo-password {
+  font-family: 'Courier New', monospace;
+  font-size: 0.85rem;
+  color: var(--color-muted);
+  flex: 1;
+}
+
+.demo-badge {
+  font-size: 0.7rem;
+  font-weight: 600;
+  padding: 0.2rem 0.55rem;
+  border-radius: 99px;
+  white-space: nowrap;
+}
+
+.demo-badge-history {
+  background: rgba(30, 136, 229, 0.15);
+  color: #42a5f5;
+  border: 1px solid rgba(30, 136, 229, 0.3);
+}
+
+.demo-badge-new {
+  background: rgba(67, 160, 71, 0.15);
+  color: #66bb6a;
+  border: 1px solid rgba(67, 160, 71, 0.3);
+}
+
 /* dark form inputs */
 .dark-input {
   background-color: #12151e !important;

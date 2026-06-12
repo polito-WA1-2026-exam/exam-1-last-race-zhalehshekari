@@ -92,12 +92,12 @@ console.log('Lines inserted.');
 //  Red:    Porta Susa ── Porta Nuova ── Dante ── Lingotto ── Fermi
 //  Blue:   Porta Susa ── Re Umberto ── Vinzaglio ── Dante ── Paradiso ── Marche
 //  Green:  Porta Nuova ── Massaua ── Nizza ── Vinzaglio ── Pozzo Strada
-//  Yellow: Lingotto ── Nizza ── Re Umberto ── Monte Grappa ── Parella
+//  Yellow: Lingotto ── Nizza ── Re Umberto ── Monte Grappa ── Bernini
 //
 //  Interchanges (6): Porta Susa (R+B), Porta Nuova (R+G),
 //                    Vinzaglio (B+G), Lingotto (R+Y),
 //                    Re Umberto (B+Y), Nizza (G+Y)
-//  Regular (8): Dante, Fermi, Paradiso, Marche, Massaua, Pozzo Strada, Monte Grappa, Parella
+//  Regular (8): Dante, Fermi, Paradiso, Marche, Massaua, Pozzo Strada, Monte Grappa, Bernini
 
 const insertStation = db.prepare(
   'INSERT INTO stations (name, is_interchange) VALUES (?, ?)'
@@ -118,7 +118,7 @@ const stationDefs = [
   ['Nizza', 1],  // Green + Yellow (interchange)
   ['Pozzo Strada', 0],  // Green terminus
   ['Monte Grappa', 0],  // Yellow
-  ['Parella', 0],  // Yellow terminus
+  ['Bernini', 0],  // Yellow terminus
 ];
 
 const stationIds = {};
@@ -138,7 +138,7 @@ const lineStations = {
   [lineRed]: ['Porta Susa', 'Porta Nuova', 'Dante', 'Lingotto', 'Fermi'],
   [lineBlue]: ['Porta Susa', 'Re Umberto', 'Vinzaglio', 'Dante', 'Paradiso', 'Marche'],
   [lineGreen]: ['Porta Nuova', 'Massaua', 'Nizza', 'Vinzaglio', 'Pozzo Strada'],
-  [lineYellow]: ['Lingotto', 'Nizza', 'Re Umberto', 'Monte Grappa', 'Parella'],
+  [lineYellow]: ['Lingotto', 'Nizza', 'Re Umberto', 'Monte Grappa', 'Bernini'],
 };
 
 for (const [lineId, names] of Object.entries(lineStations)) {
@@ -164,7 +164,7 @@ const addSegments = (lineId, names) => {
 addSegments(lineRed, ['Porta Susa', 'Porta Nuova', 'Dante', 'Lingotto', 'Fermi']);
 addSegments(lineBlue, ['Porta Susa', 'Re Umberto', 'Vinzaglio', 'Dante', 'Paradiso', 'Marche']);
 addSegments(lineGreen, ['Porta Nuova', 'Massaua', 'Nizza', 'Vinzaglio', 'Pozzo Strada']);
-addSegments(lineYellow, ['Lingotto', 'Nizza', 'Re Umberto', 'Monte Grappa', 'Parella']);
+addSegments(lineYellow, ['Lingotto', 'Nizza', 'Re Umberto', 'Monte Grappa', 'Bernini']);
 
 console.log('Segments inserted.');
 
@@ -214,28 +214,4 @@ for (const u of users) {
 
 console.log('Users inserted.');
 
-// ── Scores (pre-existing history for leaderboard) ──────────────────────────
-
-const insertScore = db.prepare(
-  "INSERT INTO scores (user_id, score, played_at) VALUES (?, ?, ?)"
-);
-
-// zhaleh and pouria have existing game history
-
-const history = [
-  // zhaleh: 3 past games
-  { username: 'zhaleh', score: 18, played_at: '2026-05-20 10:00:00' },
-  { username: 'zhaleh', score: 27, played_at: '2026-05-22 15:30:00' },
-  { username: 'zhaleh', score: 9, played_at: '2026-05-25 09:00:00' },
-  // pouria: 3 past games
-  { username: 'pouria', score: 25, played_at: '2026-05-21 11:00:00' },
-  { username: 'pouria', score: 14, played_at: '2026-05-23 17:00:00' },
-  { username: 'pouria', score: 28, played_at: '2026-05-28 20:00:00' },
-];
-
-for (const entry of history) {
-  insertScore.run(userIds[entry.username], entry.score, entry.played_at);
-}
-
-console.log('Seed scores inserted.');
 console.log('\nDatabase seeded successfully!');
