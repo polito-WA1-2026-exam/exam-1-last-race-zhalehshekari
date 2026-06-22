@@ -5,6 +5,32 @@ import session from 'express-session';
 import passport from './auth.js';
 import authRoutes from './routes/authRoutes.js';
 import gameRoutes from './routes/gameRoutes.js';
+import db from './db.js';
+
+// Auto-seed database if missing or empty
+try {
+  const tableCheck = db.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name='users'").get();
+  let needsSeeding = !tableCheck;
+  if (!needsSeeding) {
+    const userCount = db.prepare("SELECT COUNT(*) as count FROM users").get();
+    if (!userCount || userCount.count === 0) {
+      needsSeeding = true;
+    }
+  }
+  if (needsSeeding) {
+    console.log('Database is empty or missing tables. Running auto-seeding...');
+    const { seedDatabase } = await import('./seed.js');
+    seedDatabase();
+  }
+} catch (err) {
+  console.log('Error checking database status, attempting to seed:', err);
+  try {
+    const { seedDatabase } = await import('./seed.js');
+    seedDatabase();
+  } catch (seedErr) {
+    console.error('Auto-seeding failed:', seedErr);
+  }
+}
 
 const app = express();
 const port = 3001;
