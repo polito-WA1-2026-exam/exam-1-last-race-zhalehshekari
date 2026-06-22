@@ -204,6 +204,21 @@ export function seedDatabase() {
 
   console.log('Users inserted.');
 
+  // ── Scores ──────────────────────────────────────────────────────────────────
+
+  const insertScore = db.prepare(
+    'INSERT INTO scores (user_id, score, played_at) VALUES (?, ?, ?)'
+  );
+
+  // pouria: 30 on '2026-05-28 14:30:00'
+  insertScore.run(userIds['pouria'], 30, '2026-05-28 14:30:00');
+
+  // zhaleh: 26 (best) on '2026-06-11 19:10:00', and 18 on '2026-06-05 10:15:00'
+  insertScore.run(userIds['zhaleh'], 26, '2026-06-11 19:10:00');
+  insertScore.run(userIds['zhaleh'], 18, '2026-06-05 10:15:00');
+
+  console.log('Scores inserted.');
+
   console.log('\nDatabase seeded successfully!');
 }
 
