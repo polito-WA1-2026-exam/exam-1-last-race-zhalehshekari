@@ -31,7 +31,7 @@ function bfsDistance(segments, fromId, toId) {
   return Infinity; // unreachable
 }
 
-// GET /api/network — full transit network (lines, stations, segments)
+// GET /api/network
 router.get('/network', (req, res) => {
   const lines    = db.prepare('SELECT * FROM lines').all();
   const stations = db.prepare('SELECT * FROM stations').all();
@@ -39,7 +39,7 @@ router.get('/network', (req, res) => {
   res.json({ lines, stations, segments });
 });
 
-// GET /api/game/start — pick a random start/destination pair with distance >= 3
+// GET /api/game/start — random start/destination pair, BFS distance >= 3
 router.get('/game/start', (req, res) => {
   const stations = db.prepare('SELECT * FROM stations').all();
   const segments = db.prepare('SELECT * FROM segments').all();
@@ -59,53 +59,23 @@ router.get('/game/start', (req, res) => {
   res.json({ start, destination });
 });
 
-// POST /api/game/submit — validate route and assign random events
-// body: { startId, destinationId, route: [{ fromId, toId, lineId }, ...] }
-//
-// ─── VALIDATION ALGORITHM ──────────────────────────────────────────────────────────────────
-//
-// Step 1 – Boundary check
-//   route[0].fromId  must equal startId
-//   route[N-1].toId  must equal destinationId
-//
-// Step 1.5 – No duplicate segments
-//   A route may revisit the same station, but each segment (undirected)
-//   must appear at most once. Any repeated (A–B) or (B–A) pair is invalid.
-//   Canonical key: min(fromId, toId) + '-' + max(fromId, toId)
-//
-// Step 2 – Continuity (head-to-tail)
-//   For each consecutive pair (i, i+1):
-//     route[i].toId === route[i+1].fromId
-//   This guarantees the path has no gaps or teleports.
-//
-// Step 3 – Segment existence
-//   Every segment {fromId, toId} must exist in the DB on the declared lineId.
-//   Both traversal directions are valid (undirected graph).
-//
-// Step 4 – Interchange constraint (THE key rule)
-//   When two consecutive segments are on DIFFERENT lines
-//   (route[i].lineId !== route[i+1].lineId),
-//   the connecting station (route[i].toId) MUST have is_interchange = 1.
-//   If a line change happens at a regular station → invalid.
-//
-// All steps must pass; any failure returns { valid: false, score: 0 }.
-// ────────────────────────────────────────────────────────────────────────────
+// POST /api/game/submit
+// Validates: (1) boundary match, (2) no duplicate segments, (3) head-to-tail
+// continuity, (4) segments exist in DB, (5) line changes only at interchanges.
 router.post('/game/submit', (req, res) => {
   const { startId, destinationId, route } = req.body;
+  const invalid = { valid: false, score: 0, events: [] };
 
   if (!startId || !destinationId || !Array.isArray(route) || route.length === 0) {
     return res.status(400).json({ error: 'Invalid request body.' });
   }
 
-  const invalid = { valid: false, score: 0, events: [] };
-
-  // 1. Check start and end match the declared stations
+  // 1. Boundary check
   if (route[0].fromId !== startId || route[route.length - 1].toId !== destinationId) {
     return res.json(invalid);
   }
 
-  // 1.5 Check no segment is traversed more than once (stations may repeat, segments must not)
-  // Canonical key: min(fromId, toId)-max(fromId, toId) makes A→B and B→A identical.
+  // 2. No duplicate segments (canonical key ignores direction)
   const segKeys = new Set();
   for (const seg of route) {
     const key = `${Math.min(seg.fromId, seg.toId)}-${Math.max(seg.fromId, seg.toId)}`;
@@ -113,12 +83,12 @@ router.post('/game/submit', (req, res) => {
     segKeys.add(key);
   }
 
-  // 2. Check all segments connect head-to-tail
+  // 3. Head-to-tail continuity
   for (let i = 0; i < route.length - 1; i++) {
     if (route[i].toId !== route[i + 1].fromId) return res.json(invalid);
   }
 
-  // 3. Check each segment actually exists on the declared line (both directions allowed)
+  // 4. Each segment must exist in DB on the declared line (both directions OK)
   const segCheck = db.prepare(`
     SELECT id FROM segments
     WHERE line_id = ?
@@ -130,7 +100,7 @@ router.post('/game/submit', (req, res) => {
     if (!found) return res.json(invalid);
   }
 
-  // 4. Line changes are only allowed at interchange stations
+  // 5. Line changes only at interchange stations
   for (let i = 0; i < route.length - 1; i++) {
     if (route[i].lineId !== route[i + 1].lineId) {
       const station = db.prepare('SELECT is_interchange FROM stations WHERE id = ?').get(route[i].toId);
@@ -138,7 +108,7 @@ router.post('/game/submit', (req, res) => {
     }
   }
 
-  // Valid route — pick one random event per segment
+  // Valid — assign one random event per segment, update coin balance
   const events = db.prepare('SELECT * FROM events').all();
   let coins = 20;
   const eventLog = [];
@@ -151,20 +121,20 @@ router.post('/game/submit', (req, res) => {
       segmentTo:    seg.toId,
       description:  event.description,
       coin_effect:  event.coin_effect,
-      coinsAfter:   coins,       // can be negative mid-game; client shows it as-is
+      coinsAfter:   coins,
     });
   }
 
   res.json({ valid: true, score: Math.max(0, coins), events: eventLog });
 });
 
-// auth guard used by score and ranking routes
+// Middleware: require an active session
 const isLoggedIn = (req, res, next) => {
   if (req.isAuthenticated()) return next();
   res.status(401).json({ error: 'Not authenticated.' });
 };
 
-// POST /api/scores — save a score (auth required)
+// POST /api/scores
 router.post('/scores', isLoggedIn, (req, res) => {
   const { score } = req.body;
   if (score === undefined || typeof score !== 'number' || score < 0) {
@@ -174,7 +144,7 @@ router.post('/scores', isLoggedIn, (req, res) => {
   res.status(201).json({ message: 'Score saved.' });
 });
 
-// GET /api/ranking — all scores ordered by score desc (auth required)
+// GET /api/ranking — best score per user, sorted by score DESC
 router.get('/ranking', isLoggedIn, (req, res) => {
   const ranking = db.prepare(`
     SELECT u.username, s.score, s.played_at

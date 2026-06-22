@@ -10,14 +10,12 @@ import RankingPage from './pages/RankingPage';
 import GamePage from './pages/GamePage';
 import ResultPage from './pages/ResultPage';
 
-// redirect to / if not logged in
 function ProtectedRoute({ children }) {
   const { user, loading } = useAuth();
   if (loading) return null;
   return user ? children : <Navigate to="/" replace />;
 }
 
-// redirect to /game if already logged in (for the login page)
 function GuestRoute({ children }) {
   const { user, loading } = useAuth();
   if (loading) return null;
@@ -27,7 +25,6 @@ function GuestRoute({ children }) {
 function AppRoutes() {
   const { loading } = useAuth();
 
-  // wait for session check before rendering routes
   if (loading) {
     return (
       <div className="page-center text-secondary">Loading…</div>
@@ -72,7 +69,6 @@ function AppRoutes() {
               </ProtectedRoute>
             }
           />
-          {/* fallback */}
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </Container>

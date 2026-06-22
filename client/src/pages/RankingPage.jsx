@@ -17,17 +17,6 @@ function RankingPage() {
       .finally(() => setLoading(false));
   }, []);
 
-  // Keep only the highest score for each unique player
-  const uniqueRanking = [];
-  const seenUsers = new Set();
-  for (const entry of ranking) {
-    if (!seenUsers.has(entry.username)) {
-      seenUsers.add(entry.username);
-      uniqueRanking.push(entry);
-    }
-  }
-
-  const totalPlayers = uniqueRanking.length;
 
   return (
     <div className="ranking-page py-4">
@@ -47,7 +36,7 @@ function RankingPage() {
       {!loading && !error && (
         <>
           {/* Leaderboard Table */}
-          {totalPlayers === 0 ? (
+          {ranking.length === 0 ? (
             <div className="text-center py-5 rounded-4 shadow-sm border border-dashed border-secondary">
               <p className="text-muted-custom fs-5 mb-0">No scores yet — be the first to play!</p>
             </div>
@@ -63,7 +52,7 @@ function RankingPage() {
                   </tr>
                 </thead>
                 <tbody>
-                  {uniqueRanking.map((entry, i) => {
+                  {ranking.map((entry, i) => {
                     const isMe = user && entry.username === user.username;
                     const rankNum = i + 1;
                     

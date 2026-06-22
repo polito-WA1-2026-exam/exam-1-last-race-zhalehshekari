@@ -84,20 +84,9 @@ const lineYellow = insertLine.run('Yellow Line', '#FDD835').lastInsertRowid;
 
 console.log('Lines inserted.');
 
-// ── Stations ─────────────────────────────────────────────────────────────────
-// Network layout (14 stations, 6 interchanges) — Torino Metro Line 1 station names
-// Interchange rule: interchanges must not exceed half the total station count.
-// 6 / 14 ≈ 43%  ✓
-//
-//  Red:    Porta Susa ── Porta Nuova ── Dante ── Lingotto ── Fermi
-//  Blue:   Porta Susa ── Re Umberto ── Vinzaglio ── Dante ── Paradiso ── Marche
-//  Green:  Porta Nuova ── Massaua ── Nizza ── Vinzaglio ── Pozzo Strada
-//  Yellow: Lingotto ── Nizza ── Re Umberto ── Monte Grappa ── Bernini
-//
-//  Interchanges (6): Porta Susa (R+B), Porta Nuova (R+G),
-//                    Vinzaglio (B+G), Lingotto (R+Y),
-//                    Re Umberto (B+Y), Nizza (G+Y)
-//  Regular (8): Dante, Fermi, Paradiso, Marche, Massaua, Pozzo Strada, Monte Grappa, Bernini
+// 14 stations, 6 interchanges (≤ 50% per spec), named after Torino Metro Line 1 stops.
+// Interchanges: Porta Susa (R+B), Porta Nuova (R+G), Vinzaglio (B+G),
+//               Lingotto (R+Y), Re Umberto (B+Y), Nizza (G+Y)
 
 const insertStation = db.prepare(
   'INSERT INTO stations (name, is_interchange) VALUES (?, ?)'
@@ -105,20 +94,20 @@ const insertStation = db.prepare(
 
 // [name, is_interchange]
 const stationDefs = [
-  ['Porta Susa', 1],  // Red + Blue  (interchange)
-  ['Porta Nuova', 1],  // Red + Green (interchange)
-  ['Dante', 0],  // Red + Blue  — NOT an interchange (demoted to keep count ≤ 50%)
-  ['Lingotto', 1],  // Red + Yellow (interchange)
-  ['Fermi', 0],  // Red terminus
-  ['Re Umberto', 1],  // Blue + Yellow (interchange)
-  ['Vinzaglio', 1],  // Blue + Green  (interchange)
-  ['Paradiso', 0],  // Blue
-  ['Marche', 0],  // Blue terminus
-  ['Massaua', 0],  // Green
-  ['Nizza', 1],  // Green + Yellow (interchange)
-  ['Pozzo Strada', 0],  // Green terminus
-  ['Monte Grappa', 0],  // Yellow
-  ['Bernini', 0],  // Yellow terminus
+  ['Porta Susa',   1],
+  ['Porta Nuova',  1],
+  ['Dante',        0],
+  ['Lingotto',     1],
+  ['Fermi',        0],
+  ['Re Umberto',   1],
+  ['Vinzaglio',    1],
+  ['Paradiso',     0],
+  ['Marche',       0],
+  ['Massaua',      0],
+  ['Nizza',        1],
+  ['Pozzo Strada', 0],
+  ['Monte Grappa', 0],
+  ['Bernini',      0],
 ];
 
 const stationIds = {};
@@ -175,15 +164,15 @@ const insertEvent = db.prepare(
 );
 
 const events = [
-  ['Free pass found!', 4],  // +4
-  ['Stranger paid fare.', 3],  // +3
-  ['Discount applied.', 2],  // +2
-  ['Train skipped stop.', 1],  // +1
-  ['Smooth ride today.', 0],  //  0
-  ['Bought extra ticket.', -1],  // -1
-  ['Delay, missed train.', -2],  // -2
-  ['Card declined, cash.', -3],  // -3
-  ['Wrong zone ticket.', -4],  // -4
+  ['Free pass found!',    4],
+  ['Stranger paid fare.', 3],
+  ['Discount applied.',   2],
+  ['Train skipped stop.', 1],
+  ['Smooth ride today.',  0],
+  ['Bought extra ticket.', -1],
+  ['Delay, missed train.', -2],
+  ['Card declined, cash.', -3],
+  ['Wrong zone ticket.',  -4],
 ];
 
 for (const [desc, effect] of events) {

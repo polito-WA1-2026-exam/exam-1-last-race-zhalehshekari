@@ -7,7 +7,8 @@
 |---|---|---|
 | `/` | Anyone | Home page with game instructions and a "Log in to play" CTA. Anonymous users cannot access the game or ranking. |
 | `/login` | Guest only | Login form (redirects already-logged-in users to `/game`). |
-| `/game` | Logged in only | Full game flow: Phase 1 (map study), Phase 2 (90 s planning), Phase 3 (execution animation), Phase 4 (result screen). |
+| `/game` | Logged in only | Full game flow: Phase 1 (map study), Phase 2 (90 s planning), Phase 3 (execution animation). |
+| `/result` | Logged in only | Post-game summary screen. Displays route validity, final coin score, full event log, and actions to play again or view the ranking. Receives game data via React Router state — navigating directly redirects to `/game`. |
 | `/ranking` | Logged in only | Global leaderboard sorted by score descending. Current user's rows are highlighted. |
 
 Any unknown URL falls back to `/`.
@@ -102,9 +103,19 @@ All routes are prefixed with `/api`.
 
 ---
 
-## Screenshot
+## Screenshots
 
-![Screenshot](./img/screenshot.jpg)
+| Home | Login |
+|---|---|
+| ![Home page](./img/screenshot-home.png) | ![Login page](./img/screenshot-login.png) |
+
+| Phase 1 — Study the Network | Phase 2 — Planning |
+|---|---|
+| ![Setup phase](./img/screenshot-setup.png) | ![Planning phase](./img/screenshot-planning.png) |
+
+| Phase 4 — Result | Leaderboard |
+|---|---|
+| ![Result screen](./img/screenshot-result.png) | ![Ranking page](./img/screenshot-ranking.png) |
 
 ## Users Credentials
 
@@ -119,5 +130,8 @@ Zhaleh and Pouria have pre-seeded score history. Ali starts with no scores.
 ---
 
 ## Use of AI Tools
-Briefly describe whether you used any AI tools (e.g., ChatGPT, GitHub Copilot, Claude) while working on this project, for which purposes (e.g., clarifying concepts, debugging, generating code), and how you verified or adapted their output.
-If you did not use any AI tools, simply state so.
+
+I used Gemini during the development of this project for two main purposes:
+
+1. **Code Generation & Boilerplate**: I used the tool to generate baseline structures for some React components, utility functions (such as the array shuffling logic for the segments), and initial backend helper functions.
+2. **Debugging and Optimization**: It assisted me in resolving state management bugs in the frontend, specifically ensuring the route sequence updated correctly without duplicate loops and clarifying the strict validation rules of the assignment.

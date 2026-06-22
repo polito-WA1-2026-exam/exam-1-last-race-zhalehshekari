@@ -9,7 +9,6 @@ import gameRoutes from './routes/gameRoutes.js';
 const app = express();
 const port = 3001;
 
-// allow requests from the React dev server with session cookies
 app.use(cors({
   origin: 'http://localhost:5173',
   credentials: true,
@@ -28,7 +27,6 @@ app.use(session({
 app.use(passport.initialize());
 app.use(passport.session());
 
-// routes
 app.use('/api/sessions', authRoutes);
 app.use('/api', gameRoutes);
 

@@ -1,5 +1,5 @@
 // Station pixel positions for the SVG viewBox (0 0 600 450)
-// These match the seed IDs: 1=Porta Susa … 14=Parella
+// These match the seed IDs: 1=Porta Susa … 14=Bernini
 const POS = {
   1:  [100, 75],   // Porta Susa    (Red + Blue)
   2:  [225, 75],   // Porta Nuova   (Red + Green)
@@ -14,7 +14,7 @@ const POS = {
   11: [315, 310],  // Nizza         (Green + Yellow)
   12: [450, 335],  // Pozzo Strada  (Green)
   13: [100, 335],  // Monte Grappa  (Yellow)
-  14: [100, 415],  // Parella       (Yellow)
+  14: [100, 415],  // Bernini       (Yellow)
 };
 
 function NetworkMap({
