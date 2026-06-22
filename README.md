@@ -109,11 +109,11 @@ All routes are prefixed with `/api`.
 |---|---|
 | ![Home page](./img/screenshot-home.png) | ![Login page](./img/screenshot-login.png) |
 
-| Phase 1 — Study the Network | Phase 2 — Planning |
+| Study the Network | Planning |
 |---|---|
 | ![Setup phase](./img/screenshot-setup.png) | ![Planning phase](./img/screenshot-planning.png) |
 
-| Phase 4 — Result | Leaderboard |
+| Result | Leaderboard |
 |---|---|
 | ![Result screen](./img/screenshot-result.png) | ![Ranking page](./img/screenshot-ranking.png) |
 
